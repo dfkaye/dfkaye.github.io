@@ -63,10 +63,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-tdd-boilerplate" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-javascript-function-constructors" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2014/03/04/tdd-boilerplate/" class="article-date">
-  <time datetime="2014-03-05T01:21:28.000Z" itemprop="datePublished">Mar 4 2014</time>
+    <a href="/2014/03/14/javascript-function-constructors/" class="article-date">
+  <time datetime="2014-03-14T17:40:07.000Z" itemprop="datePublished">Mar 14 2014</time>
 </a>
     
   </div>
@@ -77,7 +77,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2014/03/04/tdd-boilerplate/">Build your own TDD boilerplate project for JavaScript</a>
+      <a class="article-title" href="/2014/03/14/javascript-function-constructors/">JavaScript&#39;s Function() constructor and eval()</a>
     </h1>
   
 
@@ -85,708 +85,396 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><strong>Getting started with tests takes time</strong> because there are many small decisions 
-to make.  If you haven&#39;t gone through the whole setup and evolution more than 
-once or twice, it&#39;s easy to get lost or just plain forget.</p>
-<p>This post aims to walk through the creation of a TDD boilerplate project for 
-re-use when driving your JavaScript tests.  We&#39;ll set up the project to work 
-with <a href="https://github.com/" target="_blank">GitHub</a>, <a href="http://nodejs.org/" target="_blank">node.js</a>, 
-<a href="http://visionmedia.github.io/mocha/" target="_blank">mocha</a>, 
-<a href="http://rawgithub.com/" target="_blank">rawgithub</a>, 
-<a href="https://github.com/airportyh/testem" target="_blank">testem</a> and 
-<a href="https://travis-ci.org/" target="_blank">travis</a>.  All steps were re-learned the hard way while 
-I worked through my own <a href="https://github.com/dfkaye/where.js" target="_blank">where.js</a> project 
-in January-February 2014.</p>
-<p><strong>Special thanks</strong> to these wonderful people for their patient attention 
-to detail and their marvelous feedback</p>
+        <p>In a <em>future</em> post, I argue that the <code>Function</code> constructor in JavaScript can be 
+used for good, solving specific problems.  </p>
+<p>Preparatory to that, in <em>this</em> post, I examine the <code>eval</code> function and the 
+<code>Function</code> constructor to highlight their similarities as well as their subtle 
+differences, and how to use them without problems.</p>
+<h1 id="good-or-bad-">good or bad?</h1>
+<p>As JavaScript developers we have long been warned about using the <code>eval</code>, 
+<code>Function</code>, <code>setInterval</code> and <code>setTimeout</code> functions, most famously by 
+<a href="http://javascript.crockford.com/code.html" target="_blank">Douglas Crockford</a> 
+(<em>scroll to the bottom</em>).</p>
+<p>Since then several authors have shown safe use cases for <code>eval</code> and <code>Function</code>:</p>
 <ul>
-<li><a href="http://tobyho.com/" target="_blank">Toby Ho</a>, creator of 
-<a href="https://github.com/airportyh/testem" target="_blank">testem</a></li>
-<li><a href="https://twitter.com/jamonholmgren" target="_blank">Jamon Holmgren</a></li>
-<li><a href="https://twitter.com/JohnBRoberts1" target="_blank">John B. Roberts</a> </li>
+<li><a href="http://blog.simonwillison.net/" target="_blank">Simon Willison</a>: <a href="http://24ways.org/2005/dont-be-eval/" target="_blank">Don&#39;t be eval</a></li>
+<li><a href="http://www.bennadel.com/index.cfm" target="_blank">Ben Nadel</a>: 
+<a href="http://www.bennadel.com/blog/1927-Faking-Context-In-Javascript-s-Function-Constructor.htm" target="_blank">Faking Context In Javascript&#39;s Function() Constructor</a>
+in which he uses <code>eval()</code> inside a loop inside a <code>Function</code> constructor string.</li>
+<li><a href="http://twitter.com/alex_young" target="_blank">Alex Young</a>: 
+[JS101: The Function Constructor}(<a href="http://dailyjs.com/2012/07/09/function-2/" target="_blank">http://dailyjs.com/2012/07/09/function-2/</a>)</li>
+<li><a href="(http://www.nczonline.net/blog">Nicholas Zakas</a>: 
+<a href="http://www.nczonline.net/blog/2013/06/25/eval-isnt-evil-just-misunderstood/" target="_blank">eval() isn&#39;t evil, just misunderstood</a> </li>
+<li><a href="http://github.com/skeeto" target="_blank">Christopher Wellons</a>: 
+<a href="http://nullprogram.com/blog/2013/08/17/" target="_blank">JavaScript Function Metaprogramming</a></li>
 </ul>
-<h2 id="cross-platform-emphasis">Cross-platform emphasis</h2>
-<p>The JavaScript you&#39;ll see here is designed (hacked) to run on both node.js and 
-in the browser without using a special loader or packager like 
-<a href="http://browserify.org/" target="_blank">browserify</a> or <a href="http://requirejs.org/" target="_blank">require.js</a>. 
-The point is that we first get the project <em>started</em> and get comfortable with 
-the TDD workflow in both runtimes.</p>
-<h2 id="how-long-">How long?</h2>
-<p>60-90 minutes, depending on what you have already set up, and how many of the 
-suggested breaks you take.</p>
-<h2 id="tl-dr">tl;dr</h2>
-<p>Here&#39;s my own version of the project we&#39;re going to build ~ 
-<a href="https://github.com/dfkaye/tdd-boilerplate" target="_blank">dfkaye/tdd-boilerplate</a></p>
-<h2 id="workflow">Workflow</h2>
-<p>This sequence <em>seems</em> long, as there are several decisions to make.  We&#39;ll do 
-just enough so you can see the process itself take shape. The most important 
-sections are those on <code>mocha</code> and <code>testem</code>.  However, the sequence is done 
-in an order that shakes out the structural kinks in the workflow.</p>
-<p>Between each section, I recommend taking a break before moving on.</p>
-<h3 id="-set-up-github-github-repo-"><a href="#github-repo">set up GitHub</a></h3>
-<p>We&#39;ll start by setting up the project on your system, then on GitHub.  While 
-these steps can be done separately, <strong>I recommend doing them together - right 
-away - so you can verify that committing your changes actually works</strong>.</p>
-<h3 id="-set-up-node-js-node-js-"><a href="#node-js">set up node.js</a></h3>
-<p>After GitHub, we&#39;ll set up <a href="http://nodejs.org/" target="_blank">node.js</a>, a server-side runtime 
-for JavaScript, to drive our tests and development.  </p>
-<h3 id="-add-mocha-tests-mocha-suite-"><a href="#mocha-suite">add mocha tests</a></h3>
-<p>We&#39;ll use <a href="http://npmjs.org" target="_blank">npm</a>, included with node.js, to install 
-<a href="http://visionmedia.github.io/mocha/" target="_blank">mocha</a>, a very flexible JavaScript test 
-runner by <a href="http://tjholowaychuk.com/" target="_blank">TJ Holowaychuk</a>, and start driving some 
-tests.</p>
-<h3 id="-add-npm-test-npm-test-"><a href="#npm-test">add npm test</a></h3>
-<p>We&#39;ll add a way to drive the suite through node.js without specifying node in 
-the command each time.</p>
-<h3 id="-add-browser-suite-browser-suite-"><a href="#browser-suite">add browser suite</a></h3>
-<p>We&#39;ll create a browser suite for mocha that we can view as a standalone or 
-static page.</p>
-<h3 id="-add-rawgithub-link-rawgithub-"><a href="#rawgithub">add rawgithub link</a></h3>
-<p>We&#39;ll look at using <a href="http://rawgithub.com/" target="_blank">rawgithub</a>, a proxy service set up 
-by <a href="http://wonko.com/" target="_blank">Ryan Grove</a>, for loading static pages from your GitHub 
-repo, so you can view the <em>running</em> browser suite online.</p>
-<h3 id="-add-testem-testem-"><a href="#testem">add testem</a></h3>
-<p>We&#39;ll use npm to install 
-<a href="https://github.com/airportyh/testem" target="_blank">testem</a>, a node.js socket-based test 
-harness developed by <a href="http://tobyho.com/" target="_blank">Toby Ho</a>, for both node and 
-cross-browser development to drive all our suites simultaneously.</p>
-<h3 id="-add-travis-hook-travis-"><a href="#travis">add travis hook</a></h3>
-<p>We&#39;ll add support for <a href="https://travis-ci.org/" target="_blank">travis</a>, a remote service that 
-runs your projects tests each time you commit to GitHub.  </p>
-<h3 id="-next-steps-next-"><a href="#next">next steps</a></h3>
-<p>Short list of other test libraries and projects.</p>
-<h3 id="-get-started-"><code>----------------------- GET STARTED ------------------------</code></h3>
-<h2 id="github-repo">GitHub repo</h2>
-<p>If you&#39;ve not used it before, <a href="http://github.com" target="_blank">GitHub</a> is an online 
-repository for storing and sharing your projects using 
-<a href="http://git-scm.com/" target="_blank">git</a>, the distributed version control system.  To use them 
-you will need to install 
-<a href="https://help.github.com/articles/set-up-git" target="_blank">git or msysgit from GitHub</a></p>
-<p>(<em>I leave the setup details as an exercise for the reader.</em>)</p>
-<p>Once you&#39;re set up with git and GitHub, open your command line shell or git-bash 
-terminal.</p>
-<h3 id="create-the-local-project-directory-with-git-files">Create the local project directory with git files</h3>
-<p>We need a place to start locally so let&#39;s create the directory and initialize it 
-for use with git and GitHub.</p>
-<p>On the command line create and initialize the project folder, e.g., </p>
-<pre><code>mkdir tdd-boilerplate
-cd tdd-boilerplate
-git init
-</code></pre><p>You should see a message like <code>Initialized empty Git repository in 
-[path/to]/tdd-boilerplate/.git/</code></p>
-<h3 id="create-the-remote-project-on-github">Create the remote project on GitHub</h3>
-<p>GitHub makes setting a up new project pretty easy.  We&#39;ll use the online service 
-to do that.</p>
-<p>Open a browser and create the <a href="https://github.com/new" target="_blank">new project on GitHub</a></p>
-<ul>
-<li>name it &#39;tdd-boilerplate&#39;</li>
-<li>add a short description (you can change this later)</li>
-<li>choose public, not private (show your work)</li>
-<li>select <code>initialize with a README</code></li>
-<li>add .gitignore file - choose <code>Node</code></li>
-<li>add a license - choose <code>MIT</code> (you can change this later)</li>
-<li>click <code>Create Repository</code></li>
-</ul>
-<p>You should be redirected your new tdd-boilerplate project page.</p>
-<p><strong>Note</strong> 
-The <code>.gitignore</code> file should have a handful open of entries - these are files or 
-directories that git will ignore whenever your add, commit, and push changes. 
-In this case, by choosing <code>Node</code>, we&#39;ll have entry for <code>node_modules</code> so that 
-any npm modules we install won&#39;t be pushed to GitHub.</p>
-<h3 id="sync-up-with-github">Sync up with GitHub</h3>
-<p>We need the remote files we just created to be sync&#39;d with our local directory. 
-Git will detect the changes that we&#39;re about to make to our local files and can 
-then commit those to the remote repository at GitHub.</p>
-<p>First we need to tell git about our remote repo and assign it as <code>origin</code>. Enter 
-the following at the command line, replacing <code>YOUR_NAME</code> with your GitHub 
-username:</p>
-<pre><code>git remote add origin git@github.com:YOUR_NAME/tdd-boilerplate.git
-</code></pre><p>Now pull down the <code>license</code>, <code>README</code> and <code>.gitignore</code> files from GitHub</p>
-<pre><code>git pull
-</code></pre><p>You should see a message similar to this</p>
-<pre><code>remote: Counting objects: 5, done.
-remote: Compressing objects: 100% (5/5), done.
-remote: Total 5 (delta 0), reused 0 (delta 0)
-Unpacking objects: 100% (5/5), done.
-From github.com:YOUR_NAME/tdd-boilerplate
- * branch            master     -&gt; FETCH_HEAD
-</code></pre><p>Let&#39;s add a file to the project with nothing in it</p>
-<pre><code>touch index.js
-</code></pre><p>We&#39;ll fill this in eventually with actual JavaScript.  Right now we just want to 
-verify we can commit successfully to the remote repository.</p>
-<h3 id="commit-our-changes-to-git-and-push-them-to-github-">Commit our changes to git, and push them to GitHub.</h3>
-<pre><code>git status
-git add .
-git commit -am &#39;first commit; sync up&#39;
-git push -u origin master
-</code></pre><p>You should see a success message ending with something like</p>
-<pre><code>025cf88..103f972  master -&gt; master
-Branch master set up to track remote branch master from origin.
-</code></pre><h3 id="verify-this-checkin">Verify this checkin</h3>
-<p>Open the repo on github.com (<a href="https://github.com/YOUR_NAME/tdd-boilerplate" target="_blank">https://github.com/YOUR_NAME/tdd-boilerplate</a>), and 
-verify the <code>index.js</code> file is listed.    </p>
-<p>Now we&#39;re in sync.</p>
-<h3 id="addendum-git-config-">addendum: <code>.git/config</code></h3>
-<p>Working on this project and receiving <em>enlightening</em> feedback from reviewers, I 
-added this short bit to explain the <code>.git/config</code> file&#39;s contents.</p>
-<p>When we initialized the project with <code>git init</code>, git added several directories 
-and files for itself to track our changes and so forth.  </p>
-<p>Open the file at <code>/tdd-boilerplate/.git/config</code>. Depending on your git client 
-settings, the first section should resemble</p>
-<pre><code>[core]
-  repositoryformatversion = 0
-  filemode = false
-  bare = false
-  logallrefupdates = true
-  symlinks = false
-  ignorecase = true
-  hideDotFiles = dotGitOnly    
-</code></pre><p>Verify these lines appear</p>
-<pre><code>[remote &quot;origin&quot;]
-  url = git@github.com:YOUR_NAME/tdd-boilerplate.git
-  fetch = +refs/heads/*:refs/remotes/origin/*
-</code></pre><p>This was added by git when we used the <code>git remote add origin</code> command.</p>
-<p>Verify these lines appear </p>
-<pre><code>[branch &quot;master&quot;]
-  remote = origin
-  merge = refs/heads/master
-</code></pre><p>This was added by git when we used the <code>git push -u origin master</code> 
-command.</p>
-<p>While you can modify this file directly if you wish, be sure to consult GitHub 
-documentation about 
-<a href="https://help.github.com/articles/adding-a-remote" target="_blank">Adding a Remote</a> for more 
-information.  </p>
-<h3 id="-break-time-"><code>----------------------- BREAK TIME ------------------------</code></h3>
-<h2 id="node-js">node.js</h2>
-<p>If you haven&#39;t used it, go get <a href="http://nodejs.org/" target="_blank">node.js</a>, a server-side 
-runtime for JavaScript.  </p>
-<p>(<em>I leave the setup details as an exercise for the reader.</em>)</p>
-<p>Once you&#39;re set up with node.js, open your command line shell or git-bash 
-terminal.</p>
-<h3 id="configure-the-npm-package">Configure the npm package</h3>
-<p>Every node.js module or project should have a package descriptor file, named 
-<code>package.json</code>, which makes it re-usable by other developers as well as services 
-such as travis which we&#39;ll see later.</p>
-<p>Use <a href="https://www.npmjs.org/doc/cli/npm-init.html" target="_blank"><code>npm init</code></a> to create the 
-<code>package.json</code> file at the root of the project.  This utility prompts you at the 
-command line for a title, description, and some other things.  Just get through 
-enough steps to create the file. </p>
-<pre><code>cd tdd-boilerplate
-npm init
-</code></pre><p><code>npm init</code> will output the package.json file text before saving. You should see 
-something like this</p>
-<pre><code>{
-  &quot;name&quot;: &quot;tdd-boilerplate&quot;,
-  &quot;version&quot;: &quot;0.0.0&quot;,
-  &quot;description&quot;: &quot;TDD boilerplate for JavaScript projects&quot;,
-  &quot;main&quot;: &quot;index.js&quot;,
-  &quot;scripts&quot;: {
-    &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;
-  },
-  &quot;repository&quot;: {
-    &quot;type&quot;: &quot;git&quot;,
-    &quot;url&quot;: &quot;git://github.com/YOUR_NAME/tdd-boilerplate.git&quot;
-  },
-  &quot;keywords&quot;: [
-    &quot;tdd&quot;,
-    &quot;javascript&quot;,
-    &quot;boilerplate&quot;,
-    &quot;testem&quot;,
-    &quot;rawgithub&quot;
-  ],
-  &quot;author&quot;: &quot;YOUR_NAME &lt;YOUR@EMAILADDRESS.com&gt;&quot;,
-  &quot;license&quot;: &quot;MIT&quot;,
-  &quot;bugs&quot;: {
-    &quot;url&quot;: &quot;https://github.com/YOUR_NAME/tdd-boilerplate/issues&quot;
-  }
+<p>We&#39;ll list some problems with these methods - at a higher level - then proceed 
+with the API, and how to work around the problems in code.</p>
+<h1 id="problems">problems</h1>
+<h2 id="overuse">overuse</h2>
+<p>The general case we are warned against is <em>naive overuse</em>. The following example 
+is taken from a <a href="http://stackoverflow.com/a/87260" target="_blank">stackoverflow</a> thread on not 
+using <code>eval</code> - to wit, doing this</p>
+<pre><code>eval(&#39;document.&#39; + potato + &#39;.style.color = &quot;red&quot;&#39;);
+</code></pre><p>instead of either of these</p>
+<pre><code>// DOM Level 1 element access
+document[potato].style.color = &#39;red&#39;;
+
+// DOM Level 2 element access
+document.getElementById(potato).style.color = &#39;red&#39;;
+</code></pre><h2 id="errors">errors</h2>
+<p>The special case is passing in source code from over the wire - an ajax 
+response, for example - in order to create an object and apply it to already 
+running code.  The danger is that malicious or malformed code will result in 
+errors, causing your application to misbehave or stop behaving altogether.</p>
+<p>In response to this issue in particular, Douglas Crockford promoted the use of 
+<code>JSON.parse</code> and <code>JSON.stringify</code> methods for processing ajax response text to 
+avoid evaluating JSON as JavaScript.</p>
+<h2 id="local-scope-access">local scope access</h2>
+<p><code>eval</code> also has access to all variables within the calling context or execution 
+scope (i.e., inside the function) in which it is used. That makes it unsafe, if 
+you want to avoid clobbering local variables inadvertently.</p>
+<p><code>Function</code> does <strong>not</strong> have access to the calling scope, but malicious or 
+malformed code will still cause problems.</p>
+<h2 id="global-scope-access">global scope access</h2>
+<p>The <code>eval</code> function has access to the global scope, so it can clobber any 
+globals as well.  <code>Function</code> shares this problem.</p>
+<h2 id="debuggers">debuggers</h2>
+<p>The <code>eval</code> function acts as a code generator of sorts. Code generated at runtime 
+is harder to debug - that is, step through with a debugger - because you can&#39;t 
+set break points on code that hasn&#39;t been evaluated. <code>Function</code> shares this 
+problem.</p>
+<h2 id="performance">performance</h2>
+<p>Another problem is the performance hit that <code>eval</code> incurs because it must parse, 
+evaluate, then interpret, source code of unpredictable size - it may contain few 
+statements, or very many. <code>Function</code> shares this problem.</p>
+<p>That last point, that the input size is not knowable beforehand, means that code 
+minifiers can&#39;t minify the blocks of strings ahead of time, and that runtime 
+engines may not be able to optimize lookahead caching (a fancy way of saying, 
+they can&#39;t compile it).</p>
+<h1 id="the-api">the API</h1>
+<p><code>eval</code> evaluates a string representing JavaScript code and executes it.</p>
+<pre><code>eval(code)
+</code></pre><p><code>Function</code> can be called with or without the <code>new</code> operator. <code>Function</code> takes 
+one or more string arguments and produces a new function object. The last 
+argument is a string representing JavaScript code. </p>
+<pre><code>// no param names
+var F = Function(code)
+</code></pre><p>Arguments before the code are evaluated as parameter names to be applied to the 
+new function object.  This can take one of 3 forms.</p>
+<pre><code>// explicit param name strings
+var F = Function(&#39;a&#39;, &#39;b&#39;, code);
+
+// comma-separated param names in a string
+var F = Function(&#39;a, b&#39;, code);
+
+// array of param name strings
+var F = Function([&#39;a&#39;, &#39;b&#39;], code);
+</code></pre><p>The array signature turns out to be quite handy, not only for the param names,</p>
+<pre><code> var argNames = [&#39;a&#39;, &#39;b&#39;];
+</code></pre><p>...but for the code or function body parts, too,</p>
+<pre><code>var lines = [&quot;console.log(arguments.length);&quot;,
+             &quot;console.log(a);&quot;,
+             &quot;console.log(b)&quot;];
+</code></pre><p>...allowing us to create a factory that takes two arrays of strings</p>
+<pre><code>function factory(params, lines) {
+
+  // ...preprocessing statements here...
+
+  return Function(params || &#39;&#39;, lines.join(&#39;\n&#39;));
 }
 
+var test = factory(argNames, lines);
 
-Is this ok? (yes) 
-</code></pre><p>Type <code>yes</code> to save.</p>
-<h3 id="commit-our-changes-to-git-and-push-them-to-github-">Commit our changes to git, and push them to GitHub.</h3>
-<pre><code>git status
-git add .
-git commit -am &#39;add package.json&#39;
-git push
-</code></pre><h3 id="-break-time-"><code>----------------------- BREAK TIME ------------------------</code></h3>
-<h2 id="mocha-suite">mocha suite</h2>
-<p>We&#39;ll use <code>npm</code> to install <a href="http://visionmedia.github.io/mocha/" target="_blank">mocha</a>, the 
-JavaScript test runner.  Then we&#39;ll create an actual test and verify that we can
-run it from the command line.</p>
-<h3 id="install-mocha">Install mocha</h3>
-<p>At the command line:</p>
-<pre><code>cd tdd-boilerplate
-npm install mocha --save-dev
-</code></pre><p>This will install mocha to a <code>node_modules</code> directory in the project, and add 
-mocha as a <code>devDependency</code> to the package.json file.  </p>
-<p><strong>Note</strong> 
-The <code>node_modules</code> directory should be listed in the <code>.gitignore</code> file we
-created when getting started with GitHub.  That entry prevents the 
-<code>node_modules</code> directory from being checked in and pushed to GitHub.</p>
-<h3 id="create-test-directory-for-mocha-and-some-placeholder-test-files">Create <code>test</code> directory for <code>mocha</code> and some placeholder test files</h3>
-<p>We&#39;ll create a test that can be run from either node or the browser.
-We&#39;ll then create a node-specific suite to drive the mocha/suite.</p>
-<pre><code>mkdir test test/mocha
-touch test/mocha/suite.js
-touch test/mocha/node-suite.js
-</code></pre><h3 id="create-a-test">Create a test</h3>
-<p>Open <code>test/mocha/suite.js</code> and add the following boilerplate:</p>
-<pre><code>// mocha/suite.js
-
-var boilerplate;
-
-if (typeof require == &#39;function&#39;) {
-  // enable to re-use in a browser without require.js
-  boilerplate = &#39;boilerplate&#39;;
-}
-
-describe(&#39;smoke test&#39;, function() {
-  it(&#39;should pass&#39;, function () {
-    assert.equal(boilerplate, &#39;boilerplate&#39;, &#39;failure message&#39;);
-  });
-});
-</code></pre><h3 id="create-the-node-suite">Create the node-suite</h3>
-<p>We&#39;ll create the node-specific suite for our test that drives mocha 
-programmatically.  That will allow us to use <code>npm test</code> command further down 
-which will give us a way to add specific test commands to our <code>package.json</code> 
-file.</p>
-<p>Open <code>test/mocha/node-suite.js</code> and add the following to load the mocha tests:</p>
-<pre><code>// test/mocha/node-suite.js
-
-// This runs with mocha programmatically rather than from the command line.
-// how-to-with-comments taken from https://github.com/itaylor/qunit-mocha-ui
-
-//Load mocha
-var Mocha = require(&quot;mocha&quot;);
-
-//Tell mocha to use the interface.
-var mocha = new Mocha({ui:&quot;bdd&quot;, reporter:&quot;spec&quot;});
-
-//Add your test files
-mocha.addFile(&quot;./test/mocha/suite.js&quot;);
-
-//Run your tests
-mocha.run(function(failures){
-  process.exit(failures);
-});
-</code></pre><h3 id="verify-it-from-node-js">Verify it from node.js</h3>
-<p>Tell node.js to run the node-suite by the following command</p>
-<pre><code>node ./test/mocha/node-suite.js
-</code></pre><p>You should see an error message</p>
-<pre><code>$ node ./test/mocha/node-suite.js
-
-  .
-
-  0 passing (4ms)
-  1 failing
-
-  1) smoke test should pass:
-     ReferenceError: assert is not defined    
-</code></pre><p><strong>Aha!</strong> We need to require the <code>assert</code> module that ships with node.js first</p>
-<pre><code>// mocha/suite.js
-
-var boilerplate;
-
-// ... ADD THIS LINE ...
-var assert;
-
-if (typeof require == &#39;function&#39;) {
-  // enable to re-use in a browser without require.js
-  boilerplate = &#39;boilerplate&#39;;
-
-  // ... ADD THIS LINE ...
-  assert =  require(&#39;assert&#39;);
-}
-
-describe(&#39;smoke test&#39;, function() {
-  it(&#39;should pass&#39;, function () {
-    assert.equal(boilerplate, &#39;boilerplate&#39;, &#39;failure message&#39;);
-  });
-});
-</code></pre><p>Re-run the test</p>
-<pre><code>node ./test/mocha/node-suite.js
-</code></pre><p>That should pass</p>
-<pre><code>$ node ./test/mocha/node-suite.js
-  .
-
-  1 passing (4ms)
-</code></pre><h3 id="create-the-code-to-be-tested">Create the code to be tested</h3>
-<pre><code>touch index.js
-</code></pre><p>Open the <code>index.js</code> file and add the following 
-<a title="immediately invoked function expression">IIFE</a></p>
-<pre><code>// main boilerplate
-
-;(function () {
-
-  // node.js
-  if (typeof module != &quot;undefined&quot;) {
-    module.exports = boilerplate;
-  }
-  // browser
-  if (typeof window != &quot;undefined&quot;) {
-    !window.boilerplate &amp;&amp; (window.boilerplate = boilerplate);
-  }
-
-  function boilerplate() {
-    return &#39;boilerplate&#39;;
-  }
+test(3, 5); // 2, 3, 5
+test(88); // 1, 88, undefined
+test(0, 1, 4); // 3, 0, 1
+test(null); // 1, null, undefined   
+</code></pre><h1 id="scope-object-of-this-">scope object of <code>this</code></h1>
+<h2 id="-eval-"><code>eval</code></h2>
+<p>In <code>eval</code>, <code>this</code> refers to the scope of the calling context. In <em>general</em>, 
+<code>this</code> will refer to the global scope</p>
+<pre><code>(function testEval() {
+  eval(&#39;console.log(this);&#39;); // window or global
 }());
-</code></pre><p><strong>Note</strong> The node-vs-browser assignment blocks are useful for getting started 
-with tests that can run on either environment.  You can replace that later with 
-a loading library of your choice.</p>
-<p>Open the <code>mocha/suite.js</code> file and change our boilerplate assignment to load<br><code>index.js</code>:</p>
-<pre><code>if (typeof require == &#39;function&#39;) {
-  // enable to re-use in a browser without require.js
 
-  // ... COMMENT OR REMOVE THIS LINE...
-  //boilerplate = &#39;boilerplate&#39;;
-
-  // ... ADD THIS LINE ...
-  boilerplate = require(&#39;../../index.js&#39;);
-
-  assert = require(&#39;assert&#39;);
+(function testEval() {
+  (function nested() {
+    eval(&#39;console.log(this);&#39;); // window or global
+  }());
+}());
+</code></pre><h3 id="constructor-usage">constructor usage</h3>
+<p>Where <code>eval</code> is called inside a function invoked with the <code>new</code> operator, <code>this</code> 
+refers to the <em>constructor</em> (rather than the newly created object):</p>
+<pre><code>function EvalTest() {
+  eval(&#39;console.log(this);&#39;);
+  eval(&#39;console.log(this instanceof EvalTest);&#39;);
 }
-</code></pre><p>Re-run the node suite</p>
-<pre><code>node ./test/mocha/node-suite.js
-</code></pre><p>You should see an error message</p>
-<pre><code>$ node ./test/mocha/node-suite.js
-  .
 
-  0 passing (4ms)
-  1 failing
+new EvalTest();
 
-  1) smoke test should pass:
-     AssertionError: failure message
-</code></pre><p><strong>Aha!</strong> we need to modify the reference to <code>boilerplate()</code> as a <em>method call</em> 
-in our assert statement.</p>
-<pre><code>describe(&#39;smoke test&#39;, function() {
-  it(&#39;should pass&#39;, function () {
+// EvalTest !
+// true
+</code></pre><p>That can be done with inline definition and instantiation as</p>
+<pre><code>new function EvalTest(){
+  eval(&#39;console.log(this);&#39;); // EvalTest !
+  eval(&#39;console.log(this instanceof EvalTest);&#39;); // true
+};
 
-    // ... COMMENT OR REMOVE THIS LINE...  
-    //assert.equal(boilerplate, &#39;boilerplate&#39;, &#39;failure message&#39;);
+(new function EvalTest() {
+  eval(&#39;console.log(this);&#39;); // EvalTest !
+  eval(&#39;console.log(this instanceof EvalTest);&#39;); // true
+}());
 
-    // ... ADD THIS LINE ...         
-    assert.equal(boilerplate(), &#39;boilerplate&#39;, &#39;failure message&#39;);
-  });
+new (function EvalTest(){
+  eval(&#39;console.log(this);&#39;); // EvalTest !
+  eval(&#39;console.log(this instanceof EvalTest);&#39;); // true      
 });
-</code></pre><p>Re-run the test</p>
-<pre><code>node ./test/mocha/node-suite.js
-</code></pre><p>That should pass.</p>
-<h3 id="commit-our-changes-to-git-and-push-them-to-github-">Commit our changes to git, and push them to GitHub.</h3>
-<pre><code>git status
-git add .
-git commit -am &#39;first mocha test and node suite&#39;
-git push
-</code></pre><h3 id="-break-time-"><code>----------------------- BREAK TIME ------------------------</code></h3>
-<h2 id="npm-test">npm test</h2>
-<p>The <a href="https://www.npmjs.org/doc/cli/npm-test.html" target="_blank">npm test</a> command allows us to
-run specific tests in our project without having to specify <code>node</code> in the 
-command line.  That lets other programs and services exercise our tests more 
-easily.</p>
-<h3 id="npm-scripts-entry">npm <code>scripts</code> entry</h3>
-<p>Add an entry in <code>package.json</code> as </p>
-<pre><code>&quot;scripts&quot; : {
-  &quot;test&quot;: &quot;node test/mocha/node-suite.js&quot;
-},
-</code></pre><p>including the trailing comma if it&#39;s not the last entry.  The <code>test</code> entry 
-should be present with an <code>echo</code> statement if you followed the npm init step 
-above.</p>
-<p>Now try the <code>test</code> command to run the mocha tests on node.js </p>
-<pre><code>npm test
-</code></pre><p>Should see mocha&#39;s spec reporter listing the single passing <code>smoke test</code>.</p>
-<pre><code>...
-smoke test
-  v should pass
+</code></pre><h2 id="-function-"><code>Function</code></h2>
+<p>In the <code>Function</code> constructor, <code>this</code> is the global scope by default. These 
+examples use immediate invocations of the new function object</p>
+<p>inside a function</p>
+<pre><code>(function testFunction() {     
+  Function(&#39;console.log(this);&#39;)(); // window or global
+}());
+</code></pre><p>as an anonymous constructor</p>
+<pre><code>(function testFunction() {     
+  new Function(&#39;console.log(this);&#39;)(); // window or global
+}());
+</code></pre><p>inside a constructor</p>
+<pre><code>(new function testFunction() {
+  Function(&#39;console.log(this);&#39;)();  // Window or global
+}());
 
+new function testFunction() {
+  Function(&#39;console.log(this);&#39;)();  // Window or global
+};
+</code></pre><p>When the created function object is executed as a <em>named</em> constructor, <code>this</code> 
+refers to the instantiated object</p>
+<pre><code>(function testFunction() {
+  var F = Function(&#39;console.log(this);&#39;);
+  new F();  // anonymous (FF) or Object { } (webkit)
+}());
 
-1 passing (8ms)
-</code></pre><h3 id="commit-our-changes-to-git-and-push-them-to-github-">Commit our changes to git, and push them to GitHub.</h3>
-<pre><code>git status
-git add .
-git commit -am &#39;npm test script&#39;
-git push
-</code></pre><h3 id="-break-time-"><code>----------------------- BREAK TIME ------------------------</code></h3>
-<h2 id="browser-suite">browser suite</h2>
-<p>In this section we&#39;ll create an HTML file that runs our tests with mocha, and 
-which we can view as a static page.  We&#39;ll modify it later to work with testem.</p>
-<p>To run mocha in the browser you&#39;ll need <code>mocha.js</code> and <code>mocha.css</code> files that 
-are separate from mocha&#39;s node.js bundle.</p>
-<h3 id="add-mocha-css-and-mocha-js-vendor-files">Add mocha.css and mocha.js vendor files</h3>
-<p>Create a <code>/vendor/mocha</code> directory</p>
-<pre><code>cd tdd-boilerplate
-mkdir vendor vendor/mocha
-</code></pre><p>Fetch these files and save them in the vendor/mocha directory.</p>
-<p><strong>If you have <code>curl</code></strong> you can do these</p>
-<pre><code>curl https://raw.githubusercontent.com/visionmedia/mocha/master/mocha.css &gt; ./vendor/mocha/mocha.css
-curl https://raw.githubusercontent.com/visionmedia/mocha/master/mocha.js &gt; ./vendor/mocha/mocha.js
-</code></pre><p><strong>else</strong> you can navigate to the files directly in a browser and copy+paste 
-their content to the respective target file:</p>
-<ul>
-<li>copy <a href="https://raw.githubusercontent.com/visionmedia/mocha/master/mocha.css" target="_blank">https://raw.githubusercontent.com/visionmedia/mocha/master/mocha.css</a> to 
-<code>/vendor/mocha/mocha.css</code></li>
-<li>copy <a href="https://raw.githubusercontent.com/visionmedia/mocha/master/mocha.js" target="_blank">https://raw.githubusercontent.com/visionmedia/mocha/master/mocha.js</a> to 
-<code>/vendor/mocha/mocha.js</code></li>
-</ul>
-<p><strong>Be Advised</strong>
-When copying the file text into your editor, be sure FIRST to set the file&#39;s 
-encoding to UTF-8.  ASCII encoding will force conversions of entities, such as 
-the checkmarks, to question marks :(</p>
-<h3 id="create-an-html-file-for-our-browser-suite">Create an HTML file for our browser suite</h3>
-<pre><code>touch test/mocha/browser-suite.html
-</code></pre><p>Open the <code>test/mocha/browser-suite.html</code> file and add the following</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;meta charset=&quot;utf-8&quot;&gt;
-    &lt;title&gt;tdd-boilerplate mocha browser-suite&lt;/title&gt;
-    &lt;link rel=&quot;stylesheet&quot; href=&quot;../../vendor/mocha/mocha.css&quot; /&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;div id=&quot;mocha&quot;&gt;&lt;/div&gt;
-    &lt;script src=&quot;../../index.js&quot;&gt;&lt;/script&gt;
+(function testFunction() {
+  var F = Function(&#39;console.log(this.toString());&#39;);
+  new F();  // [object Object]
+}());
+</code></pre><p>If you set the scope dynamically, as with any function, using <code>call</code> or <code>apply</code>, 
+<code>this</code> refers to that scope</p>
+<pre><code>(function testFunction() {     
+  Function(&#39;console.log(this.id);&#39;).call({ id: &#39;fake&#39; }); // &#39;fake&#39;
+}());
+</code></pre><p>Using <code>call</code> or <code>apply</code> without a defined scope, <code>this</code> refers by default to the 
+global scope</p>
+<pre><code>(function testFunction() {     
+  Function(&#39;console.log(this);&#39;).apply(); // Window or global
+}());
+</code></pre><h1 id="scope-access">scope access</h1>
+<h2 id="-eval-"><code>eval</code></h2>
+<p>Because <code>eval</code> has access to the global scope, the following creates a new 
+global variable</p>
+<pre><code>(function testEval() {
+  eval(&#39;answer = 42&#39;);
+  console.log(answer); // 42
+}());
 
-    &lt;script src=&quot;../../vendor/mocha/mocha.js&quot;&gt;&lt;/script&gt;
-    &lt;script&gt;mocha.setup(&#39;bdd&#39;)&lt;/script&gt;
+console.log(answer); // 42
+</code></pre><p>Because <code>eval</code> has access to the calling or local scope, <code>eval</code> will clobber the 
+variable named inside that scope without affecting the global scope</p>
+<pre><code>var answer = &#39;default&#39;;
 
-    &lt;!-- get tests and start --&gt;
-    &lt;script src=&quot;./suite.js&quot;&gt;&lt;/script&gt;
-    &lt;script&gt;
-      mocha.checkLeaks();
-      mocha.globals([&#39;boilerplate&#39;]); // watch our boilerplate function
-      mocha.run();
-    &lt;/script&gt;        
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h3 id="run-the-browser-tests">Run the browser tests</h3>
-<p>Open this file in your browser to verify file paths are correct (mocha runs, the 
-styles are correct).</p>
-<p><strong>Hold it!</strong> You should see a <strong>failing</strong> test as there is no <code>assert</code> module 
-in the browser.</p>
-<h3 id="add-assert-js">Add assert.js</h3>
-<p>Fetch the browser version of <code>assert</code> and place it in the /vendor directory 
-directory</p>
-<pre><code>curl https://raw.githubusercontent.com/Jxck/assert/master/assert.js -o ./vendor/assert.js
-</code></pre><p>or copy <a href="https://raw.githubusercontent.com/Jxck/assert/master/assert.js" target="_blank">https://raw.githubusercontent.com/Jxck/assert/master/assert.js</a> to 
-/vendor/assert.js</p>
-<p><strong>Reminder</strong>
-When copying the file text into your editor, be sure FIRST to set the file&#39;s 
-encoding to UTF-8.  ASCII encoding will force conversions of entities, such as 
-the checkmarks, to question marks :(</p>
-<p>Open <code>browser-suite.html</code> and add this script tag just before <code>mocha/mocha.js</code></p>
-<pre><code>&lt;script src=&quot;../../vendor/assert.js&quot;&gt;&lt;/script&gt;
-</code></pre><p>Re-load the browser-suite in your browser to verify that the single test passes.</p>
-<h3 id="commit-our-changes-to-git-and-push-them-to-github-">Commit our changes to git, and push them to GitHub.</h3>
-<pre><code>git status
-git add .
-git commit -am &#39;browser suite; mocha files; assert; &#39;
-git push
-</code></pre><h3 id="-break-time-"><code>----------------------- BREAK TIME ------------------------</code></h3>
-<h2 id="rawgithub">rawgithub</h2>
-<p>This <em>optional</em> step in the process is very short but worth considering for a 
-moment.</p>
-<p>I like using <a href="http://rawgithub.com" target="_blank">rawgithub</a> to confirm that the project&#39;s 
-browser tests really are accessing the correct file paths remotely, and to 
-share these tests with others online.</p>
-<h3 id="add-rawgithub-link-to-the-browser-suite-on-your-readme-page">Add rawgithub link to the browser suite on your README page</h3>
-<p>Open the README page and add the following markdown</p>
-<pre><code># rawgithub
+(function testEval() {
+  var answer;
+  eval(&#39;answer = 42&#39;);
+  console.log(answer); // 42
+}());
 
-+ [mocha suite](https://rawgithub.com/YOUR_NAME/YOUR_PROJECT/master/test/mocha/browser-suite.html)
-</code></pre><h3 id="commit-our-changes-to-git-and-push-them-to-github-">Commit our changes to git, and push them to GitHub.</h3>
-<pre><code>git status
-git add .
-git commit -am &#39;rawgithub&#39;
-git push
-</code></pre><h3 id="view-the-browser-suites-on-rawgithub">View the browser suites on rawgithub</h3>
-<p>Give it a moment, then view the project page on GitHub and visit the rawgithub 
-page via the new link.</p>
-<h3 id="-break-time-"><code>----------------------- BREAK TIME ------------------------</code></h3>
-<h2 id="testem">testem</h2>
-<p>The <code>testem</code> harness makes cross-browser TDD extremely fast.  In this section 
-we&#39;ll add testem to our workflow and use it to run all tests on node and in 
-multiple browsers.</p>
-<h3 id="install-testem">Install testem</h3>
-<p>testem is a npm module so we can install it easily</p>
-<pre><code>npm install testem -g
-</code></pre><p>Use the <code>-g</code> flag to install testem globally, so you can re-use it easily on 
-other projects.</p>
-<h3 id="refactor-the-browser-suite-for-use-with-testem">Refactor the browser suite for use with testem</h3>
-<p>Open <code>test/mocha/browser-suite.html</code> and add the following inline script block 
-(between mocha.setup and start comment)
-    ...
-    <script>mocha.setup(&#39;bdd&#39;)</script></p>
-<pre><code>&lt;script&gt;
-  if (location.href.indexOf(&#39;://localhost:7357&#39;) != -1) {
-    // testem goes between test runner setup and the tests
-    document.write(&#39;&lt;script src=&quot;/testem.js&quot;&gt;&#39; + &#39;&lt;\/&#39; + &#39;script&gt;&#39;);
+console.log(answer); // &#39;default&#39;
+</code></pre><h2 id="-function-"><code>Function</code></h2>
+<p><code>Function</code> has access to the global scope and can create or clobber global 
+variables</p>
+<pre><code>(function testFunction() {     
+  Function(&#39;answer = 42&#39;)();
+  console.log(answer); // 42
+}());
+
+console.log(answer); // 42 ! here&#39;s our leak
+</code></pre><p><code>Function</code> does <strong>not</strong> have access to the calling scope</p>
+<pre><code>(function testFunction() {
+  var answer = &#39;default&#39;;
+  Function(&#39;answer = 42&#39;)();
+  console.log(answer); // &#39;default&#39;
+}());
+</code></pre><p>However that will create or clobber a global variable</p>
+<pre><code>console.log(answer); // 42 ! here&#39;s our leak
+</code></pre><h1 id="strict-mode">strict mode</h1>
+<p>As Nicholas Zakas argues, we can 
+<a href="http://www.nczonline.net/blog/2012/03/13/its-time-to-start-using-javascript-strict-mode/" target="_blank">start using strict mode</a>
+in ES5 runtimes to prevent the creation and/or clobbering of accidental globals.  </p>
+<p>Here&#39;s the general usage of strict mode within a function</p>
+<pre><code>(function testFunction() {     
+  &quot;use strict&quot;;
+  (function() {
+    answer = 42; // ReferenceError: assignment to undeclared variable answer
+  })();
+  console.log(answer); // n/a
+}());
+</code></pre><h2 id="-eval-"><code>eval</code></h2>
+<p>We can use strict mode with <code>eval</code> to prevent leaking and clobbering from within 
+a local scope</p>
+<pre><code>(function testEval() {
+  var answer;
+  eval(&#39;&quot;use strict&quot;; answer = 42&#39;);
+  console.log(answer); // 42
+}());
+
+(function testEval() {
+  &quot;use strict&quot;; 
+  eval(&#39;answer = 42&#39;); // ReferenceError: assignment to undeclared variable answer
+  console.log(answer); // n/a
+}());
+
+(function testEval() {
+  eval(&#39;&quot;use strict&quot;; answer = 42&#39;); // ReferenceError: assignment to undeclared variable answer
+  console.log(answer); // n/a
+}());
+</code></pre><h2 id="-function-constructor"><code>Function</code> constructor</h2>
+<p>Because <code>Function</code> does not have access to the local scope, the &quot;use strict&quot; 
+pragma must be included in the <code>Function</code> body in order to prevent leaking and 
+clobbering from within a local scope.  </p>
+<p>This fails</p>
+<pre><code>(function testFunction() {     
+  &quot;use strict&quot;;
+  Function(&#39;answer = 42&#39;)();
+  console.log(answer); // 42
+}());
+
+console.log(answer); // 42 -- leaking
+</code></pre><p>This works</p>
+<pre><code>(function testFunction() {     
+  Function(&#39;&quot;use strict&quot;; answer = 42&#39;)(); // ReferenceError: assignment to undeclared variable answer
+  console.log(answer); // n/a
+}());
+</code></pre><h1 id="paranoid-sandbox">paranoid sandbox</h1>
+<p>For runtimes that do not support strict mode you need to implement a sandbox 
+that cleans up any accidental or temporary globals created when running 
+<code>Function</code> or <code>eval</code>.</p>
+<p>Here&#39;s a quick implementation of such a sandbox function</p>
+<pre><code>function sandbox(fn) {
+
+  // hack for cross-platform global
+  global = global || window;
+
+  var keys = {};
+  var result, k;
+
+  for (k in global) {
+    keys[k] = k;
   }
-&lt;/script&gt;
 
-&lt;!-- get tests and start --&gt;
-...
-</code></pre><h3 id="try-it-with-testem">Try it with testem</h3>
-<p>Tell testem to run, forwarding the browser to the URL of our test page</p>
-<pre><code>testem -t ./test/mocha/browser-suite.html
-</code></pre><p>You should see testem open in the shell waiting for tests.</p>
-<h3 id="open-a-browser-manually">Open a browser manually</h3>
-<p>You can open any browser manually and go to <code>http://localhost:7357</code></p>
-<p>The browser should forward to 
-<code>http://localhost:7357/test/mocha/browser-suite.html</code> and you should now see the 
-browser suite with results, and see that testem has printed the results in the 
-shell.</p>
-<p>Hit <code>q</code> to stop testem.</p>
-<h3 id="open-a-browser-with-a-testem-launcher">Open a browser with a testem launcher</h3>
-<p>You can use a testem <code>launcher</code> for the particular browser you want to try.  To 
-open the test automatically in chrome, start testem by running the following:</p>
-<pre><code>testem -l chrome
-</code></pre><p>Chrome should open and forward to 
-<code>http://localhost:7357/test/mocha/browser-suite.html</code> and you should now see the 
-browser suite with results, and see that testem has printed the results in the 
-shell.</p>
-<p>Hit <code>q</code> to stop testem.</p>
-<h3 id="configure-testem-to-launch-the-node-js-suite-with-a-custom-launcher">Configure testem to launch the node.js suite with a custom launcher</h3>
-<p>We&#39;ll define a custom launcher for testem that runs our node suite.  To do that 
-we need a configuration file for testem, called <code>testem.json</code>.</p>
-<p>Create the <code>testem.json</code> file</p>
-<pre><code>touch testem.json
-</code></pre><p>Add the following</p>
-<pre><code>{
-  &quot;launchers&quot;: {
-    &quot;mocha&quot; : {
-      &quot;command&quot;: &quot;node ./test/mocha/node-suite.js&quot;
+  result = fn();
+
+  for (k in global) {
+    if (!(k in keys)) {
+      delete global[k];
     }
   }
+
+  return result;
 }
-</code></pre><p>Verify this works by starting testem from the command line</p>
-<pre><code>testem -l mocha
-</code></pre><p>You should see the node test passing in the shell.  If your browser is still 
-open you should also see the browser suite passing in the shell.</p>
-<p>Hit <code>q</code> to stop testem.</p>
-<h3 id="configure-npm-scripts-to-run-testem-in-the-browser">Configure npm scripts to run testem in the browser</h3>
-<p>Now we&#39;d like to run both node.js and browser-suite in testem at the same time.
-To set that up, add the <code>testem</code> entry in the <code>scripts</code> section of your 
-project&#39;s <code>package.json</code> file:</p>
-<pre><code>&quot;scripts&quot; : {
-  &quot;test&quot;: &quot;node ./test/mocha/node-suite.js&quot;,
-  &quot;testem&quot;: &quot;testem -l mocha -t ./test/mocha/browser-suite.html&quot; 
-}
-</code></pre><p><strong>Note</strong> that the <code>testem</code> entry contains both the <code>mocha</code> launcher and the <code>-t</code> 
-flag for the browser suite.</p>
-<p>Start both node and browser suites with testem from the command line </p>
-<pre><code>npm run testem
-</code></pre><p>You should see the passing test in both node and browser.</p>
-<h3 id="commit-our-changes-to-git-and-push-them-to-github-">Commit our changes to git, and push them to GitHub.</h3>
-<pre><code>git status
-git add .
-git commit -am &#39;testem, scripts, launcher commands&#39;
-git push
-</code></pre><h3 id="-break-time-"><code>----------------------- BREAK TIME ------------------------</code></h3>
-<h2 id="travis">travis</h2>
-<p>Once you have several tests in place and have made several commits to GitHub, 
-it&#39;s nice to have a service that runs tests for you on check-in.  Travis is just 
-such a service, allowing you continuous verification.  <strong>This is especially 
-important when you are working with others</strong> who make regular updates to the 
-project.  </p>
-<h3 id="set-the-project-to-notify-travis">Set the project to notify travis</h3>
-<p>Visit the <a href="http://travis-ci.org/profile" target="_blank">travis profile</a> page to set up travis 
-to be notified by GitHub every time you commit something to your repo.  You will 
-be prompted to sign in with your GitHub credentials if you haven&#39;t done this 
-before.  </p>
-<p>On the travis profile, visit the Accounts page (mouseover your gravitar at the 
-upper right - the Accounts link will appear).  </p>
-<p>Find the <code>tdd-boilerplate</code> repo in the list that appears.  If it&#39;s not there, 
-click <code>Sync Now</code> to refresh travis from GitHub.  When you find the repo listed, 
-click the <code>Off</code> button to the <code>On</code> state.</p>
-<p>Now travis will be able to run the <code>npm test</code> command on your repo every time 
-you push changes to GitHub.</p>
-<h3 id="verify-the-service-hook-for-travis-on-github">Verify the service hook for travis on GitHub</h3>
+</code></pre><p>First there is be a pre-test that collects all keys currently assigned to the 
+global namespace.  After the target function is run, clean up any new keys found 
+in the global namespace.</p>
+<p>The following is a drastically reduced example of using it</p>
+<pre><code>var context = {
+  name:       &#39;david&#39;,
+  occupation: &#39;typist&#39;
+};
+
+var code = [&#39;for (var key in context) {&#39;,
+            &#39;  if (context.hasOwnProperty(key)) {&#39;,
+            &#39;    console.log(key);&#39;,
+            &#39;  }&#39;,
+            &#39;}&#39;];
+
+sandbox(function () {
+  Function(&#39;context&#39;, code.join(&#39;\n&#39;))(context);
+  return context;
+});
+</code></pre><p>The key is to use <code>Function</code> inside another function that is actually passed to 
+the <code>sandbox</code> function.</p>
+<h1 id="debugging-breakpoints-etc-">debugging ~ breakpoints, etc.</h1>
+<p>I confess I do not use line debuggers when isolating problems in JavaScript, as 
+I prefer the healthy practice of test-driven development.  However, following 
+Paul Irish&#39;s chrome dev tools 
+<a href="http://www.youtube.com/watch?v=WQZio5DlSXM" target="_blank">live recompilation demo</a> I was able 
+to live edit this fragment using breakpoints, live-edit, ctrl+s or cmd+s, and 
+play, with a successful result.</p>
+<pre><code>;(function () {
+  var id = &#39;rest&#39;; // should be &#39;result&#39; instead
+  var code = [&#39;var result = document.getElementById(\&#39;&#39; + id + &#39;\&#39;);&#39;,
+              &#39;result.textContent = \&#39;success\&#39;;&#39;
+             ];
+  Function(code.join(&#39;\n&#39;))();
+}());
+</code></pre><p>So, yes, it can be done, as our tools are maturing.</p>
+<h1 id="performance">performance</h1>
+<p>It depends. Not all JavaScript runtimes optimize the same things, or even in the 
+same way. OK, truism, yes. Everyone immersed in the performance wars has 
+learned that performance varies, and not all things require performance 
+optimization.</p>
+<p>Nicholas Zakas in 
+<a href="http://shop.oreilly.com/product/9780596802806.do" target="_blank">High Performance JavaScript</a>, 
+illustrates the performance cost that use of <code>eval</code> or <code>Function</code> incurs. 
+<a href="http://answers.oreilly.com/topic/1374-avoid-double-evaluation-for-faster-javascript/" target="_blank">Here&#39;s the relevant excerpt</a> 
+with a data table showing the cost in time for each browser runtime.</p>
+<p>Published in 2010, that table shows performance slowing by whole orders of 
+magnitude (10 to 100 times) depending which runtime is used.</p>
+<p>Since then, the browser engine wars have narrowed this difference significantly.</p>
+<p>From this <a href="http://jsperf.com/function-vs-constructor-vs-eval" target="_blank">jsperf test</a>, 
+comparing <code>eval</code>, <code>Function()</code> and <code>function expression</code>, the only consistent 
+results I&#39;ve seen on so far:</p>
 <ul>
-<li>go to the service hooks page for the project at 
-<code>https://github.com/YOUR_NAME/tdd-boilerplate/settings/hooks</code></li>
-<li>select <code>Configure Services</code></li>
-<li>should find <code>travis</code> in the list that appears - it should be <code>checked</code></li>
+<li><code>Function</code> is consistently slowest on FF 27 by 60% or more ~ this is the worst 
+disparity among the three approaches on any of the modern browsers I&#39;ve tried.</li>
+<li>no strategy wins on IE 11 ~ each approach has shown up as &#39;fastest&#39; on 
+repeated test runs</li>
+<li>performance distribution is narrowest on Chrome 33 and Opera 19</li>
 </ul>
-<h3 id="configure-travis-for-your-project">Configure travis for your project</h3>
-<p>Create a <code>.travis.yml</code> file (leading dot included)</p>
-<pre><code>touch .travis.yml
-</code></pre><p>Enter the following for travis to run the node.js tests:</p>
-<pre><code>language: node_js
-node_js:
-  - &quot;0.11&quot;
-  - &quot;0.10&quot;
-  - &quot;0.08&quot;
-</code></pre><p>You don&#39;t need multiple node.js versions. I add more than one in case of API 
-changes I&#39;ve missed.</p>
-<h3 id="add-a-travis-build-status-badge">Add a travis build status badge</h3>
-<p>This is nice to have on your project&#39;s README as it&#39;s not only an image but a 
-link to the travis test result.</p>
-<p>Here&#39;s the build status link/badge for my version of tdd-boilerplate:</p>
-<p><a href="https://travis-ci.org/dfkaye/tdd-boilerplate" target="_blank"><img src="https://travis-ci.org/dfkaye/tdd-boilerplate.png?branch=master" alt="Build Status"></a></p>
-<p>Copy, paste and modify the following at the top of your version of the <code>README</code></p>
-<pre><code>[![Build Status](https://travis-ci.org/YOUR_NAME/tdd-boilerplate.png?branch=master)](https://travis-ci.org/YOUR_NAME/tdd-boilerplate)
-</code></pre><h3 id="commit-our-changes-to-git-and-push-them-to-github-">Commit our changes to git, and push them to GitHub.</h3>
-<pre><code>git status
-git add .
-git commit -am &#39;travis hook&#39;
-git push
-</code></pre><p>Travis should notify you by email whether the build passed. </p>
-<p>You can also go to the project page on GitHub and visit the travis profile page 
-via the travis badge image.  There you can see the test run for the last commit.</p>
-<h3 id="-celebrate-"><code>----------------------- CELEBRATE ------------------------</code></h3>
-<h2 id="-voil-agrave-"><em>Voil&agrave;!</em></h2>
-<p>You now have a TDD boilerplate to get started testing JavaScript projects, 
-complete with travis, npm test commands, testem launchers, and re-usable browser 
-suite viewable as a standalone or on rawgithub <em>or</em> with testem.</p>
-<p>You can start moving things around to your liking, clean up the relative paths 
-in the browser suite, for example, or move the <code>node_modules</code> directory out of 
-the project (I usually put it in a parallel directory to all my projects), or 
-go with your preferred loader solution if you&#39;re doing things more for the 
-browser than for node.js.  And so on&hellip;</p>
-<h2 id="next">Next</h2>
+<p>(BTW, <a href="https://medium.com/p/bafed6cc7979" target="_blank">Don&#39;t abuse JSPerf</a> ~ thanks ;)</p>
+<h1 id="projects">projects</h1>
+<p>Initially I examined these cases after looking through a couple of interesting 
+projects for node.js.  </p>
 <ul>
-<li><p>You can inspect my implementation of all the steps we took in my own version 
-of this project at <a href="https://github.com/dfkaye/tdd-boilerplate" target="_blank">https://github.com/dfkaye/tdd-boilerplate</a>. </p>
-</li>
-<li><p>You can <a href="https://github.com/dfkaye/tdd-boilerplate/issues" target="_blank">log issues</a> there 
-regarding any mistakes or confusion this long post may have caused.</p>
-</li>
-<li><p>Visit the <strong>tests</strong> section of my 
-<a href="https://github.com/dfkaye/where.js#tests" target="_blank">where.js</a> project to see commands 
-and implementations of this approach using other test runners, including </p>
+<li><a href="https://github.com/3rd-Eden/load" target="_blank">load</a> ~ a &quot;paranoid sandbox&quot; that executes 
+browser-like JavaScript on node.js without the module pattern, and removing 
+global assignments after use.</li>
+<li><a href="http://howtonode.org/testing-private-state-and-mocking-deps" target="_blank">Testing Private State and Mocking Dependencies</a> 
+~ interesting example using node.js <code>vm</code> module as a code sandbox for mocking 
+during tests.</li>
+</ul>
+<p>You can also visit some projects I have done using the <code>Function</code> constructor in 
+various ways:</p>
 <ul>
-<li><a href="http://jasmine.github.io/" target="_blank">jasmine</a> (v2.0.0 on browser)<ul>
-<li><a href="https://github.com/mhevery/jasmine-node" target="_blank">jasmine-node</a> which uses v1.3.1</li>
-</ul>
-</li>
-<li><a href="http://visionmedia.github.io/mocha/" target="_blank">mocha</a><ul>
-<li><code>assert</code> (on node.js) and <a href="https://github.com/Jxck/assert" target="_blank">assert.js</a> in 
-the browser</li>
-<li><a href="https://github.com/LearnBoost/expect.js" target="_blank">expect.js</a></li>
-<li><a href="https://github.com/visionmedia/should.js" target="_blank">should.js</a></li>
-<li><a href="http://chaijs.com/" target="_blank">chai</a> (assert, expect, should)</li>
-</ul>
-</li>
-<li><a href="https://github.com/caolan/nodeunit" target="_blank">nodeunit</a></li>
-<li><a href="http://qunitjs.com/" target="_blank">QUnit</a></li>
-<li><a href="https://github.com/substack/tape" target="_blank">tape</a> @substack&#39;s event-driven 
-TDD-flavored TAP project for <a href="http://ci.testling.com/" target="_blank">testling</a></li>
-</ul>
-</li>
-<li><p>Visit this example 
-<a href="https://github.com/teppeis/testem-requirejs-mocha-sample" target="_blank">testem-requirejs-mocha project</a> 
-by <a href="https://github.com/teppeis" target="_blank">@teppeis</a> for details on adding require.js to 
-your setup.</p>
-</li>
+<li><a href="https://github.com/dfkaye/vm-shim" target="_blank">vm-shim</a> ~ create a code sandbox similar 
+to node.js <code>vm.runInContext</code>, <code>vm.runInNewContext</code>, and <code>vm.runInThisContext</code> 
+methods, using the &quot;paranoid sandbox&quot; technique.</li>
+<li><a href="https://github.com/dfkaye/metafunction" target="_blank">metafunction</a> ~ introspection module 
+for mocking and testing a function&#39;s internals, also uses the &quot;paranoid 
+sandbox&quot; technique.</li>
+<li><a href="https://github.com/dfkaye/where.js" target="_blank">where.js</a> ~ test library helper method 
+for running data-driven tests against a commented text data table directly in 
+the test.</li>
 </ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://dfkaye.github.io/2014/03/04/tdd-boilerplate/" data-id="pay62gfzlkek1j9v" class="article-share-link">Share</a>
+      <a data-url="http://dfkaye.github.io/2014/03/14/javascript-function-constructors/" data-id="ckxv3cz9j04huncz" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boilerplate/">boilerplate</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javascript/">javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/rawgithub/">rawgithub</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tdd/">tdd</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/testem/">testem</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/travis/">travis</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Function/">Function</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/constructor/">constructor</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javascript/">javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/metaprogramming/">metaprogramming</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/performance/">performance</a></li></ul>
 
     </footer>
   </div>
@@ -795,6 +483,10 @@ your setup.</p>
 
 
   
+  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/archives/2014/page/2/">2</a><a class="extend next" href="/archives/2014/page/2/">Next &raquo;</a>
+    </nav>
   
 </section>
         
@@ -806,7 +498,7 @@ your setup.</p>
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/boilerplate/">boilerplate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/css/">css</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/es-discuss/">es-discuss</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hello/">hello</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/">javascript</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/promise/">promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rawgithub/">rawgithub</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/simple/">simple</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tdd/">tdd</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/testem/">testem</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travis/">travis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zen of python/">zen of python</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Function/">Function</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boilerplate/">boilerplate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/constructor/">constructor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/css/">css</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/es-discuss/">es-discuss</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hello/">hello</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/">javascript</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/metaprogramming/">metaprogramming</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/performance/">performance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/promise/">promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rawgithub/">rawgithub</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/simple/">simple</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tdd/">tdd</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/testem/">testem</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travis/">travis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zen of python/">zen of python</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -815,7 +507,7 @@ your setup.</p>
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/boilerplate/" style="font-size: 10.00px;">boilerplate</a><a href="/tags/css/" style="font-size: 10.00px;">css</a><a href="/tags/es-discuss/" style="font-size: 10.00px;">es-discuss</a><a href="/tags/hello/" style="font-size: 10.00px;">hello</a><a href="/tags/hexo/" style="font-size: 10.00px;">hexo</a><a href="/tags/javascript/" style="font-size: 20.00px;">javascript</a><a href="/tags/promise/" style="font-size: 10.00px;">promise</a><a href="/tags/rawgithub/" style="font-size: 10.00px;">rawgithub</a><a href="/tags/simple/" style="font-size: 15.00px;">simple</a><a href="/tags/tdd/" style="font-size: 15.00px;">tdd</a><a href="/tags/testem/" style="font-size: 10.00px;">testem</a><a href="/tags/travis/" style="font-size: 10.00px;">travis</a><a href="/tags/zen of python/" style="font-size: 10.00px;">zen of python</a>
+      <a href="/tags/Function/" style="font-size: 10.00px;">Function</a><a href="/tags/boilerplate/" style="font-size: 10.00px;">boilerplate</a><a href="/tags/constructor/" style="font-size: 10.00px;">constructor</a><a href="/tags/css/" style="font-size: 10.00px;">css</a><a href="/tags/es-discuss/" style="font-size: 10.00px;">es-discuss</a><a href="/tags/hello/" style="font-size: 10.00px;">hello</a><a href="/tags/hexo/" style="font-size: 10.00px;">hexo</a><a href="/tags/javascript/" style="font-size: 20.00px;">javascript</a><a href="/tags/metaprogramming/" style="font-size: 10.00px;">metaprogramming</a><a href="/tags/performance/" style="font-size: 10.00px;">performance</a><a href="/tags/promise/" style="font-size: 10.00px;">promise</a><a href="/tags/rawgithub/" style="font-size: 10.00px;">rawgithub</a><a href="/tags/simple/" style="font-size: 15.00px;">simple</a><a href="/tags/tdd/" style="font-size: 15.00px;">tdd</a><a href="/tags/testem/" style="font-size: 10.00px;">testem</a><a href="/tags/travis/" style="font-size: 10.00px;">travis</a><a href="/tags/zen of python/" style="font-size: 10.00px;">zen of python</a>
     </div>
   </div>
 
@@ -824,7 +516,7 @@ your setup.</p>
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/03">March 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/08">August 2013</a><span class="archive-list-count">3</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/03">March 2014</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/08">August 2013</a><span class="archive-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -834,6 +526,10 @@ your setup.</p>
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2014/03/14/javascript-function-constructors/">JavaScript&#39;s Function() constructor and eval()</a>
+          </li>
         
           <li>
             <a href="/2014/03/04/tdd-boilerplate/">Build your own TDD boilerplate project for JavaScript</a>
