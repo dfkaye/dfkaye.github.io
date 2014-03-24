@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives | dfkaye.github.io</title>
+  <title>Tag: gulp | dfkaye.github.io</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="og:type" content="blog">
 <meta name="og:title">
-<meta name="og:url" content="http://dfkaye.github.io//archives/page/4/">
+<meta name="og:url" content="http://dfkaye.github.io//tags/gulp/">
 <meta name="og:image">
 <meta name="og:site_name" content="dfkaye.github.io">
 <meta name="og:description">
@@ -63,10 +63,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-dont-over-promise" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-preserve-multiline-strings-with-uglify" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2013/08/13/dont-over-promise/" class="article-date">
-  <time datetime="2013-08-13T22:00:41.000Z" itemprop="datePublished">Aug 13 2013</time>
+    <a href="/2014/03/24/preserve-multiline-strings-with-uglify/" class="article-date">
+  <time datetime="2014-03-24T20:21:34.000Z" itemprop="datePublished">Mar 24 2014</time>
 </a>
     
   </div>
@@ -77,7 +77,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2013/08/13/dont-over-promise/">Don&#39;t Over-Promise</a>
+      <a class="article-title" href="/2014/03/24/preserve-multiline-strings-with-uglify/">preserve multiline strings with uglify</a>
     </h1>
   
 
@@ -85,50 +85,108 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="don-t-over-promise-a-pun-a-parable-">Don&#39;t Over-Promise (a pun &amp; a parable)</h2>
-<p>In <a href="/2013/08/12/start-simple/" title="Start Simple">Blog Post Number One</a>, I referred 
-to the <a href="http://www.python.org/dev/peps/pep-0020/" target="_blank">Zen of Python</a>&#39;s rules for 
-keeping things simple, readable, explainable.</p>
-<p>That all seems simple, easy to repeat, good advice to avoid endless mindloops. But 
-it&#39;s easily forgotten where there are many concerns or people to address 
-where the number of communications becomes combinatoric.</p>
-<p>Consider the ES6 es-discuss debates regarding Futures/Promises 
-<a href="https://twitter.com/esdiscuss/status/325757081330274305" target="_blank">start here</a>.<br>The threads go on for several days, the parties trying to hammer out the nuances 
-of a serviceable API for Futures/Promises, based on Promises/A, Promises/A+ 
-(then-ables), JQuery already-in-the-wild Deferred/Promises, etc.</p>
-<p>And that&#39;s just the syntax and semantics of Promises to be supported natively in 
-the next big iteration of JavaScript.</p>
-<p>On the implementation side, James Coglan argues in a 
-<a href="http://blog.jcoglan.com/2013/03/30/callbacks-are-imperative-promises-are-functional-nodes-biggest-missed-opportunity/" target="_blank">lengthy essay</a> 
-that the Node.js team missed the boat when they evicted Promise implementations 
-from the Node.js core.  Yet the lengthy comments and code examples demonstrate 
-how hard it is to understand when <em>not</em> to use Promises (e.g., &quot;promises try to 
-solve the wrong problem&quot;, &quot;the confusion comes from the attempt to use promises 
-to control flow of statements, not dependencies on values&quot;).</p>
-<p>Drew Crawford argues in 
-<a href="http://sealedabstract.com/code/broken-promises/" target="_blank">Broken Promises</a>, that Promises 
-are not a general solution but best applied to specific situations, because, for 
-example, &quot;a great number of perfectly ordinary things depend on knowing how many 
-elements there are.&quot;  Trouble arises when the number of elements <strong>now or in 
-future</strong> is undetermined.  Drew mentions several problems that must be addressed 
-by Futures/Promises libraries - memory, composability, parallelization and 
-atomicity.  After walking through these he has created a new DSL &quot;to specify 
-control flow and timing information&quot; &ndash; all things which the language 
-already does for you&hellip;  <em>(then came enlightenment)</em></p>
-<p>The Node.js team&#39;s decision, then, is not a vote against Promises, but a vote to 
-keep things <strong>simple</strong> in the core and let harder issues be sorted out in 
-userland.</p>
-<p>If it is hard just to understand the problem, the solution will more than likely 
-be hard to explain.  <strong>If the implementation is hard to explain, it&#39;s a bad 
-idea</strong>.</p>
+        <h1 id="-multiline-strings-with-uglifyjs">/<strong><em> multiline strings </em></strong>/ with uglifyjs</h1>
+<p>Just started playing with this (22 MAR 2014). Here are two ways to preserve 
+<code>/*** multiline string comments ***/</code> when using 
+<a href="https://github.com/mishoo/UglifyJS2" target="_blank">uglify</a>. The first uses the basic uglify 
+cli approach, the second uses <a href="http://gulpjs.com/" target="_blank">gulp</a>.</p>
+<h2 id="node-cli-example">node cli example</h2>
+<p>see <a href="https://github.com/mishoo/UglifyJS2#keeping-comments-in-the-output" target="_blank">https://github.com/mishoo/UglifyJS2#keeping-comments-in-the-output</a></p>
+<p>When uglify identifies a multiline comment in the output, it excludes the <code>/*</code> 
+or <code>*/</code> delimiters from the comment body, so you need to test the first and last 
+2 chars in the comment value.</p>
+<p>Here&#39;s a <em>quick&amp;dirty</em> regex to test it:</p>
+<pre><code>if (/^\*\*/.test(comment.value) &amp;&amp; /\*\*$/.test(comment.value)) {
+    return true;
+}
+</code></pre><p>Supposing we have a <code>source.js</code> file with a multiline string (<em>this one uses 
+<a href="//github.com/dfkaye/where.js">where.js</a>) syntax</em>):</p>
+<pre><code>where(function() {
+  /***
+    input | output
+    this  | this
 
+  ***/
+  expect(input).toBe(output);
+});
+</code></pre><p>Make a file like <code>uglify-source.js</code></p>
+<pre><code>var UglifyJS = require(&quot;uglify-js&quot;);
+var files = [&#39;source.js&#39;]; // &lt;= could do this cli-wise with process.argv
+var fs = require(&#39;fs&#39;);
+
+var all = [];
+
+files.forEach(function(file){
+
+  var result = UglifyJS.minify(file, {
+    output: {
+      comments: function (node, comment) {
+
+        console.log(comment.value);
+        if (/^\*\*/.test(comment.value) &amp;&amp; /\*\*$/.test(comment.value)) {
+
+          console.log(&#39;found tri-star comment&#39;)
+          return true;
+        }
+      }
+    }
+  });
+
+  all.push(result.code);
+});
+
+fs.writeFile(&#39;uglify-build.js&#39;, all.join(&#39;\n&#39;));
+</code></pre><p>Test it with </p>
+<pre><code>node uglify-source.js
+</code></pre><p>Should have a new file <code>uglify-build.js</code> with preserved comments</p>
+<pre><code>where(function(){/***
+    input | output
+    this  | this
+
+  ***/
+expect(input).toBe(output)});
+</code></pre><h2 id="gulp-example-with-gulp-uglify-and-gulp-rename">gulp example ~ with gulp-uglify and gulp-rename</h2>
+<p>see <a href="http://truongtx.me/2014/03/14/automate-javascript-development-with-gulp/" target="_blank">http://truongtx.me/2014/03/14/automate-javascript-development-with-gulp/</a></p>
+<p>Use the same <code>source.js</code></p>
+<p>Make <code>gulpfile.js</code></p>
+<pre><code>var gulp = require(&#39;gulp&#39;);
+var uglify = require(&#39;gulp-uglify&#39;);
+var rename = require(&#39;gulp-rename&#39;);
+
+gulp.task(&#39;uglify&#39;, function(){
+  gulp.src([&#39;./source.js&#39;]) // could do this cli-wise with process.argv
+  .pipe(uglify({
+
+    preserveComments: function (node, comment) {
+
+      console.log(comment.value);
+      if (/^\*\*/.test(comment.value) &amp;&amp; /\*\*$/.test(comment.value)) {
+
+        console.log(&#39;found tri-star comment&#39;);
+        return true;
+      }
+    }
+  }))
+  .pipe(rename(&#39;gulp-build.js&#39;))
+  .pipe(gulp.dest(&#39;./&#39;));
+});
+</code></pre><p>Test it with</p>
+<pre><code>gulp uglify
+</code></pre><p>Should have a new file <code>gulp-build.js</code> with preserved comments</p>
+<pre><code>where(function(){/***
+    input | output
+    this  | this
+
+  ***/
+expect(input).toBe(output)});
+</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://dfkaye.github.io/2013/08/13/dont-over-promise/" data-id="h5d2a3luyywf2cyf" class="article-share-link">Share</a>
+      <a data-url="http://dfkaye.github.io/2014/03/24/preserve-multiline-strings-with-uglify/" data-id="8509jc95sbjqm2t5" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/es-discuss/">es-discuss</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javascript/">javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/promise/">promise</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/simple/">simple</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gulp/">gulp</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/multiline/">multiline</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/uglify/">uglify</a></li></ul>
 
     </footer>
   </div>
@@ -137,10 +195,6 @@ idea</strong>.</p>
 
 
   
-  
-    <nav id="page-nav">
-      <a class="extend prev" href="/archives/page/3/">&laquo; Prev</a><a class="page-number" href="/archives/">1</a><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/archives/page/5/">5</a><a class="page-number" href="/archives/page/6/">6</a><a class="extend next" href="/archives/page/5/">Next &raquo;</a>
-    </nav>
   
 </section>
         
