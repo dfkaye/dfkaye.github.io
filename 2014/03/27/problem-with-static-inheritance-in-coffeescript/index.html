@@ -270,7 +270,7 @@ Manager instance:</p>
 <p>We&#39;ll do the same thing as with constructor.js.  Move <code>Employee.hire(this)</code> to a 
 new prototype method named <code>hire</code>, and override <code>Manager.prototype.hire</code> to call 
 its super instance object&#39;s <code>hire</code> method, then replace the <code>super</code> call in 
-Manager.@total with a <em>direct</em> call to <code>Manager.__super__.constructor.total()</code>:
+<code>Manager.@total</code> with a <em>direct</em> call to <code>Manager.__super__.constructor.total()</code>:
     };:</p>
 <pre><code>class Employee
 
@@ -322,14 +322,15 @@ View and Controller(Router) constructors.</p>
 <li>avoid use of <code>super</code> in &quot;static&quot; methods in CoffeeScript</li>
 <li>avoid &quot;static&quot; calls in the constructor</li>
 <li>move <code>super</code> calls from the constructor to prototype methods</li>
-<li>make <code>super</code> calls from a static method point to </li>
+<li>make <code>super</code> calls from a static method point to a static method on 
+<code>__super__.constructor</code></li>
 </ul>
 <h1 id="fin">fin</h1>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://dfkaye.github.io/2014/03/27/problem-with-static-inheritance-in-coffeescript/" data-id="yk3tcquim0dsuk86" class="article-share-link">Share</a>
+      <a data-url="http://dfkaye.github.io/2014/03/27/problem-with-static-inheritance-in-coffeescript/" data-id="c1f7mma9kibuklyr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CoffeeScript/">CoffeeScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/constructor/">constructor</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/inheritance/">inheritance</a></li></ul>
