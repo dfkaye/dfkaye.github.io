@@ -1125,13 +1125,13 @@ a.article-title:hover {
 }
 .article-entry pre,
 .article-entry .highlight {
-  background: #ccc;
+  background: #ececec;
   padding: 15px 20px;
   border-style: solid;
   border-color: #ddd;
   border-width: 1px 0;
   overflow: auto;
-  color: #286682;
+  color: #036;
   line-height: 25.6px;
 }
 .article-entry .highlight .gutter pre,
@@ -1142,6 +1142,8 @@ a.article-title:hover {
 .article-entry pre,
 .article-entry code {
   font-family: "Source Code Pro", Consolas, Monaco, Menlo, Consolas, monospace;
+  font-size: 0.95em;
+  line-height: 1.5em;
 }
 .article-entry code {
   background: #eee;
