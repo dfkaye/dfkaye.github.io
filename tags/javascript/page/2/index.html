@@ -12,6 +12,7 @@
 <meta name="og:site_name" content="dfkaye.github.io">
 <meta name="og:description">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:creator" content="dfkaye">
   
     <link rel="alternative" href="/atom.xml" title="dfkaye.github.io" type="application/atom+xml">
   
@@ -63,10 +64,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-javascript-eval-and-function-constructor" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2014/03/14/javascript-eval-and-function-constructor/" class="article-date">
-  <time datetime="2014-03-14T17:40:07.000Z" itemprop="datePublished">Mar 14 2014</time>
+    <a href="/2013/08/11/hello-world/" class="article-date">
+  <time datetime="2013-08-11T22:22:38.000Z" itemprop="datePublished">Aug 11 2013</time>
 </a>
     
   </div>
@@ -77,7 +78,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2014/03/14/javascript-eval-and-function-constructor/">JavaScript&#39;s eval() and Function() constructor</a>
+      <a class="article-title" href="/2013/08/11/hello-world/">Hello World</a>
     </h1>
   
 
@@ -85,396 +86,31 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>In a <em>future</em> post, I argue that the <code>Function</code> constructor in JavaScript can be 
-used for good, solving specific problems.  </p>
-<p>Preparatory to that, in <em>this</em> post, I examine the <code>eval</code> function and the 
-<code>Function</code> constructor to highlight their similarities as well as their subtle 
-differences, and how to use them without problems.</p>
-<h1 id="good-or-bad-">good or bad?</h1>
-<p>As JavaScript developers we have long been warned about using the <code>eval</code>, 
-<code>Function</code>, <code>setInterval</code> and <code>setTimeout</code> functions, most famously by 
-<a href="http://javascript.crockford.com/code.html" target="_blank">Douglas Crockford</a> 
-(<em>scroll to the bottom</em>).</p>
-<p>Since then several authors have shown safe use cases for <code>eval</code> and <code>Function</code>:</p>
+        <h1 id="blogging-at-last-thanks-for-stopping-by-">Blogging at last.  Thanks for stopping by.</h1>
+<p>Updated 2013-08-14: I&#39;ve switched from <a href="http://octopress.org/" target="_blank">Octopress</a> to 
+<a href="http://zespia.tw/hexo" target="_blank">Hexo</a>, a Node.js alternative. Check the 
+<a href="http://zespia.tw/hexo/docs" target="_blank">documentation</a> to learn how to use.</p>
+<h2 id="who-am-i">Who Am I</h2>
+<p>I&#39;m a JavaScript developer mainly on the front-end of web applications.</p>
 <ul>
-<li><a href="http://blog.simonwillison.net/" target="_blank">Simon Willison</a>: <a href="http://24ways.org/2005/dont-be-eval/" target="_blank">Don&#39;t be eval</a></li>
-<li><a href="http://www.bennadel.com/index.cfm" target="_blank">Ben Nadel</a>: 
-<a href="http://www.bennadel.com/blog/1927-Faking-Context-In-Javascript-s-Function-Constructor.htm" target="_blank">Faking Context In Javascript&#39;s Function() Constructor</a>
-in which he uses <code>eval()</code> inside a loop inside a <code>Function</code> constructor string.</li>
-<li><a href="http://twitter.com/alex_young" target="_blank">Alex Young</a>: 
-[JS101: The Function Constructor}(<a href="http://dailyjs.com/2012/07/09/function-2/" target="_blank">http://dailyjs.com/2012/07/09/function-2/</a>)</li>
-<li><a href="(http://www.nczonline.net/blog">Nicholas Zakas</a>: 
-<a href="http://www.nczonline.net/blog/2013/06/25/eval-isnt-evil-just-misunderstood/" target="_blank">eval() isn&#39;t evil, just misunderstood</a> </li>
-<li><a href="http://github.com/skeeto" target="_blank">Christopher Wellons</a>: 
-<a href="http://nullprogram.com/blog/2013/08/17/" target="_blank">JavaScript Function Metaprogramming</a></li>
+<li><a href="https://github.com/dfkaye?tab=repositories" target="_blank">github repos</a></li>
+<li><a href="https://gist.github.com/dfkaye" target="_blank">gists</a></li>
+<li><a href="https://twitter.com/dfkaye" target="_blank">twitter</a></li>
 </ul>
-<p>We&#39;ll list some problems with these methods - at a higher level - then proceed 
-with the API, and how to work around the problems in code.</p>
-<h1 id="problems">problems</h1>
-<h2 id="overuse">overuse</h2>
-<p>The general case we are warned against is <em>naive overuse</em>. The following example 
-is taken from a <a href="http://stackoverflow.com/a/87260" target="_blank">stackoverflow</a> thread on not 
-using <code>eval</code> - to wit, doing this</p>
-<pre><code>eval(&#39;document.&#39; + potato + &#39;.style.color = &quot;red&quot;&#39;);
-</code></pre><p>instead of either of these</p>
-<pre><code>// DOM Level 1 element access
-document[potato].style.color = &#39;red&#39;;
+<h2 id="i-like-test-driven-development">I Like Test-Driven Development</h2>
 
-// DOM Level 2 element access
-document.getElementById(potato).style.color = &#39;red&#39;;
-</code></pre><h2 id="errors">errors</h2>
-<p>The special case is passing in source code from over the wire - an ajax 
-response, for example - in order to create an object and apply it to already 
-running code.  The danger is that malicious or malformed code will result in 
-errors, causing your application to misbehave or stop behaving altogether.</p>
-<p>In response to this issue in particular, Douglas Crockford promoted the use of 
-<code>JSON.parse</code> and <code>JSON.stringify</code> methods for processing ajax response text to 
-avoid evaluating JSON as JavaScript.</p>
-<h2 id="local-scope-access">local scope access</h2>
-<p><code>eval</code> also has access to all variables within the calling context or execution 
-scope (i.e., inside the function) in which it is used. That makes it unsafe, if 
-you want to avoid clobbering local variables inadvertently.</p>
-<p><code>Function</code> does <strong>not</strong> have access to the calling scope, but malicious or 
-malformed code will still cause problems.</p>
-<h2 id="global-scope-access">global scope access</h2>
-<p>The <code>eval</code> function has access to the global scope, so it can clobber any 
-globals as well.  <code>Function</code> shares this problem.</p>
-<h2 id="debuggers">debuggers</h2>
-<p>The <code>eval</code> function acts as a code generator of sorts. Code generated at runtime 
-is harder to debug - that is, step through with a debugger - because you can&#39;t 
-set break points on code that hasn&#39;t been evaluated. <code>Function</code> shares this 
-problem.</p>
-<h2 id="performance">performance</h2>
-<p>Another problem is the performance hit that <code>eval</code> incurs because it must parse, 
-evaluate, then interpret, source code of unpredictable size - it may contain few 
-statements, or very many. <code>Function</code> shares this problem.</p>
-<p>That last point, that the input size is not knowable beforehand, means that code 
-minifiers can&#39;t minify the blocks of strings ahead of time, and that runtime 
-engines may not be able to optimize lookahead caching (a fancy way of saying, 
-they can&#39;t compile it).</p>
-<h1 id="the-api">the API</h1>
-<p><code>eval</code> evaluates a string representing JavaScript code and executes it.</p>
-<pre><code>eval(code)
-</code></pre><p><code>Function</code> can be called with or without the <code>new</code> operator. <code>Function</code> takes 
-one or more string arguments and produces a new function object. The last 
-argument is a string representing JavaScript code. </p>
-<pre><code>// no param names
-var F = Function(code)
-</code></pre><p>Arguments before the code are evaluated as parameter names to be applied to the 
-new function object.  This can take one of 3 forms.</p>
-<pre><code>// explicit param name strings
-var F = Function(&#39;a&#39;, &#39;b&#39;, code);
-
-// comma-separated param names in a string
-var F = Function(&#39;a, b&#39;, code);
-
-// array of param name strings
-var F = Function([&#39;a&#39;, &#39;b&#39;], code);
-</code></pre><p>The array signature turns out to be quite handy, not only for the param names,</p>
-<pre><code> var argNames = [&#39;a&#39;, &#39;b&#39;];
-</code></pre><p>...but for the code or function body parts, too,</p>
-<pre><code>var lines = [&quot;console.log(arguments.length);&quot;,
-             &quot;console.log(a);&quot;,
-             &quot;console.log(b)&quot;];
-</code></pre><p>...allowing us to create a factory that takes two arrays of strings</p>
-<pre><code>function factory(params, lines) {
-
-  // ...preprocessing statements here...
-
-  return Function(params || &#39;&#39;, lines.join(&#39;\n&#39;));
-}
-
-var test = factory(argNames, lines);
-
-test(3, 5); // 2, 3, 5
-test(88); // 1, 88, undefined
-test(0, 1, 4); // 3, 0, 1
-test(null); // 1, null, undefined   
-</code></pre><h1 id="scope-object-of-this-">scope object of <code>this</code></h1>
-<h2 id="-eval-"><code>eval</code></h2>
-<p>In <code>eval</code>, <code>this</code> refers to the scope of the calling context. In <em>general</em>, 
-<code>this</code> will refer to the global scope</p>
-<pre><code>(function testEval() {
-  eval(&#39;console.log(this);&#39;); // window or global
-}());
-
-(function testEval() {
-  (function nested() {
-    eval(&#39;console.log(this);&#39;); // window or global
-  }());
-}());
-</code></pre><h3 id="constructor-usage">constructor usage</h3>
-<p>Where <code>eval</code> is called inside a function invoked with the <code>new</code> operator, <code>this</code> 
-refers to the <em>constructor</em> (rather than the newly created object):</p>
-<pre><code>function EvalTest() {
-  eval(&#39;console.log(this);&#39;);
-  eval(&#39;console.log(this instanceof EvalTest);&#39;);
-}
-
-new EvalTest();
-
-// EvalTest !
-// true
-</code></pre><p>That can be done with inline definition and instantiation as</p>
-<pre><code>new function EvalTest(){
-  eval(&#39;console.log(this);&#39;); // EvalTest !
-  eval(&#39;console.log(this instanceof EvalTest);&#39;); // true
-};
-
-(new function EvalTest() {
-  eval(&#39;console.log(this);&#39;); // EvalTest !
-  eval(&#39;console.log(this instanceof EvalTest);&#39;); // true
-}());
-
-new (function EvalTest(){
-  eval(&#39;console.log(this);&#39;); // EvalTest !
-  eval(&#39;console.log(this instanceof EvalTest);&#39;); // true      
-});
-</code></pre><h2 id="-function-"><code>Function</code></h2>
-<p>In the <code>Function</code> constructor, <code>this</code> is the global scope by default. These 
-examples use immediate invocations of the new function object</p>
-<p>inside a function</p>
-<pre><code>(function testFunction() {     
-  Function(&#39;console.log(this);&#39;)(); // window or global
-}());
-</code></pre><p>as an anonymous constructor</p>
-<pre><code>(function testFunction() {     
-  new Function(&#39;console.log(this);&#39;)(); // window or global
-}());
-</code></pre><p>inside a constructor</p>
-<pre><code>(new function testFunction() {
-  Function(&#39;console.log(this);&#39;)();  // Window or global
-}());
-
-new function testFunction() {
-  Function(&#39;console.log(this);&#39;)();  // Window or global
-};
-</code></pre><p>When the created function object is executed as a <em>named</em> constructor, <code>this</code> 
-refers to the instantiated object</p>
-<pre><code>(function testFunction() {
-  var F = Function(&#39;console.log(this);&#39;);
-  new F();  // anonymous (FF) or Object { } (webkit)
-}());
-
-(function testFunction() {
-  var F = Function(&#39;console.log(this.toString());&#39;);
-  new F();  // [object Object]
-}());
-</code></pre><p>If you set the scope dynamically, as with any function, using <code>call</code> or <code>apply</code>, 
-<code>this</code> refers to that scope</p>
-<pre><code>(function testFunction() {     
-  Function(&#39;console.log(this.id);&#39;).call({ id: &#39;fake&#39; }); // &#39;fake&#39;
-}());
-</code></pre><p>Using <code>call</code> or <code>apply</code> without a defined scope, <code>this</code> refers by default to the 
-global scope</p>
-<pre><code>(function testFunction() {     
-  Function(&#39;console.log(this);&#39;).apply(); // Window or global
-}());
-</code></pre><h1 id="scope-access">scope access</h1>
-<h2 id="-eval-"><code>eval</code></h2>
-<p>Because <code>eval</code> has access to the global scope, the following creates a new 
-global variable</p>
-<pre><code>(function testEval() {
-  eval(&#39;answer = 42&#39;);
-  console.log(answer); // 42
-}());
-
-console.log(answer); // 42
-</code></pre><p>Because <code>eval</code> has access to the calling or local scope, <code>eval</code> will clobber the 
-variable named inside that scope without affecting the global scope</p>
-<pre><code>var answer = &#39;default&#39;;
-
-(function testEval() {
-  var answer;
-  eval(&#39;answer = 42&#39;);
-  console.log(answer); // 42
-}());
-
-console.log(answer); // &#39;default&#39;
-</code></pre><h2 id="-function-"><code>Function</code></h2>
-<p><code>Function</code> has access to the global scope and can create or clobber global 
-variables</p>
-<pre><code>(function testFunction() {     
-  Function(&#39;answer = 42&#39;)();
-  console.log(answer); // 42
-}());
-
-console.log(answer); // 42 ! here&#39;s our leak
-</code></pre><p><code>Function</code> does <strong>not</strong> have access to the calling scope</p>
-<pre><code>(function testFunction() {
-  var answer = &#39;default&#39;;
-  Function(&#39;answer = 42&#39;)();
-  console.log(answer); // &#39;default&#39;
-}());
-</code></pre><p>However that will create or clobber a global variable</p>
-<pre><code>console.log(answer); // 42 ! here&#39;s our leak
-</code></pre><h1 id="strict-mode">strict mode</h1>
-<p>As Nicholas Zakas argues, we can 
-<a href="http://www.nczonline.net/blog/2012/03/13/its-time-to-start-using-javascript-strict-mode/" target="_blank">start using strict mode</a>
-in ES5 runtimes to prevent the creation and/or clobbering of accidental globals.  </p>
-<p>Here&#39;s the general usage of strict mode within a function</p>
-<pre><code>(function testFunction() {     
-  &quot;use strict&quot;;
-  (function() {
-    answer = 42; // ReferenceError: assignment to undeclared variable answer
-  })();
-  console.log(answer); // n/a
-}());
-</code></pre><h2 id="-eval-"><code>eval</code></h2>
-<p>We can use strict mode with <code>eval</code> to prevent leaking and clobbering from within 
-a local scope</p>
-<pre><code>(function testEval() {
-  var answer;
-  eval(&#39;&quot;use strict&quot;; answer = 42&#39;);
-  console.log(answer); // 42
-}());
-
-(function testEval() {
-  &quot;use strict&quot;; 
-  eval(&#39;answer = 42&#39;); // ReferenceError: assignment to undeclared variable answer
-  console.log(answer); // n/a
-}());
-
-(function testEval() {
-  eval(&#39;&quot;use strict&quot;; answer = 42&#39;); // ReferenceError: assignment to undeclared variable answer
-  console.log(answer); // n/a
-}());
-</code></pre><h2 id="-function-constructor"><code>Function</code> constructor</h2>
-<p>Because <code>Function</code> does not have access to the local scope, the &quot;use strict&quot; 
-pragma must be included in the <code>Function</code> body in order to prevent leaking and 
-clobbering from within a local scope.  </p>
-<p>This fails</p>
-<pre><code>(function testFunction() {     
-  &quot;use strict&quot;;
-  Function(&#39;answer = 42&#39;)();
-  console.log(answer); // 42
-}());
-
-console.log(answer); // 42 -- leaking
-</code></pre><p>This works</p>
-<pre><code>(function testFunction() {     
-  Function(&#39;&quot;use strict&quot;; answer = 42&#39;)(); // ReferenceError: assignment to undeclared variable answer
-  console.log(answer); // n/a
-}());
-</code></pre><h1 id="paranoid-sandbox">paranoid sandbox</h1>
-<p>For runtimes that do not support strict mode you need to implement a sandbox 
-that cleans up any accidental or temporary globals created when running 
-<code>Function</code> or <code>eval</code>.</p>
-<p>Here&#39;s a quick implementation of such a sandbox function</p>
-<pre><code>function sandbox(fn) {
-
-  // hack for cross-platform global
-  global = global || window;
-
-  var keys = {};
-  var result, k;
-
-  for (k in global) {
-    keys[k] = k;
-  }
-
-  result = fn();
-
-  for (k in global) {
-    if (!(k in keys)) {
-      delete global[k];
-    }
-  }
-
-  return result;
-}
-</code></pre><p>First there is be a pre-test that collects all keys currently assigned to the 
-global namespace.  After the target function is run, clean up any new keys found 
-in the global namespace.</p>
-<p>The following is a drastically reduced example of using it</p>
-<pre><code>var context = {
-  name:       &#39;david&#39;,
-  occupation: &#39;typist&#39;
-};
-
-var code = [&#39;for (var key in context) {&#39;,
-            &#39;  if (context.hasOwnProperty(key)) {&#39;,
-            &#39;    console.log(key);&#39;,
-            &#39;  }&#39;,
-            &#39;}&#39;];
-
-sandbox(function () {
-  Function(&#39;context&#39;, code.join(&#39;\n&#39;))(context);
-  return context;
-});
-</code></pre><p>The key is to use <code>Function</code> inside another function that is actually passed to 
-the <code>sandbox</code> function.</p>
-<h1 id="debugging-breakpoints-etc-">debugging ~ breakpoints, etc.</h1>
-<p>I confess I do not use line debuggers when isolating problems in JavaScript, as 
-I prefer the healthy practice of test-driven development.  However, following 
-Paul Irish&#39;s chrome dev tools 
-<a href="http://www.youtube.com/watch?v=WQZio5DlSXM" target="_blank">live recompilation demo</a> I was able 
-to live edit this fragment using breakpoints, live-edit, ctrl+s or cmd+s, and 
-play, with a successful result.</p>
-<pre><code>;(function () {
-  var id = &#39;rest&#39;; // should be &#39;result&#39; instead
-  var code = [&#39;var result = document.getElementById(\&#39;&#39; + id + &#39;\&#39;);&#39;,
-              &#39;result.textContent = \&#39;success\&#39;;&#39;
-             ];
-  Function(code.join(&#39;\n&#39;))();
-}());
-</code></pre><p>So, yes, it can be done, as our tools are maturing.</p>
-<h1 id="performance">performance</h1>
-<p>It depends. Not all JavaScript runtimes optimize the same things, or even in the 
-same way. OK, truism, yes. Everyone immersed in the performance wars has 
-learned that performance varies, and not all things require performance 
-optimization.</p>
-<p>Nicholas Zakas in 
-<a href="http://shop.oreilly.com/product/9780596802806.do" target="_blank">High Performance JavaScript</a>, 
-illustrates the performance cost that use of <code>eval</code> or <code>Function</code> incurs. 
-<a href="http://answers.oreilly.com/topic/1374-avoid-double-evaluation-for-faster-javascript/" target="_blank">Here&#39;s the relevant excerpt</a> 
-with a data table showing the cost in time for each browser runtime.</p>
-<p>Published in 2010, that table shows performance slowing by whole orders of 
-magnitude (10 to 100 times) depending which runtime is used.</p>
-<p>Since then, the browser engine wars have narrowed this difference significantly.</p>
-<p>From this <a href="http://jsperf.com/function-vs-constructor-vs-eval" target="_blank">jsperf test</a>, 
-comparing <code>eval</code>, <code>Function()</code> and <code>function expression</code>, the only consistent 
-results I&#39;ve seen on so far:</p>
-<ul>
-<li><code>Function</code> is consistently slowest on FF 27 by 60% or more ~ this is the worst 
-disparity among the three approaches on any of the modern browsers I&#39;ve tried.</li>
-<li>no strategy wins on IE 11 ~ each approach has shown up as &#39;fastest&#39; on 
-repeated test runs</li>
-<li>performance distribution is narrowest on Chrome 33 and Opera 19</li>
-</ul>
-<p>(BTW, <a href="https://medium.com/p/bafed6cc7979" target="_blank">Don&#39;t abuse JSPerf</a> ~ thanks ;)</p>
-<h1 id="projects">projects</h1>
-<p>Initially I examined these cases after looking through a couple of interesting 
-projects for node.js.  </p>
-<ul>
-<li><a href="https://github.com/3rd-Eden/load" target="_blank">load</a> ~ a &quot;paranoid sandbox&quot; that executes 
-browser-like JavaScript on node.js without the module pattern, and removing 
-global assignments after use.</li>
-<li><a href="http://howtonode.org/testing-private-state-and-mocking-deps" target="_blank">Testing Private State and Mocking Dependencies</a> 
-~ interesting example using node.js <code>vm</code> module as a code sandbox for mocking 
-during tests.</li>
-</ul>
-<p>You can also visit some projects I have done using the <code>Function</code> constructor in 
-various ways:</p>
-<ul>
-<li><a href="https://github.com/dfkaye/vm-shim" target="_blank">vm-shim</a> ~ create a code sandbox similar 
-to node.js <code>vm.runInContext</code>, <code>vm.runInNewContext</code>, and <code>vm.runInThisContext</code> 
-methods, using the &quot;paranoid sandbox&quot; technique.</li>
-<li><a href="https://github.com/dfkaye/metafunction" target="_blank">metafunction</a> ~ introspection module 
-for mocking and testing a function&#39;s internals, also uses the &quot;paranoid 
-sandbox&quot; technique.</li>
-<li><a href="https://github.com/dfkaye/where.js" target="_blank">where.js</a> ~ test library helper method 
-for running data-driven tests against a commented text data table directly in 
-the test.</li>
-</ul>
-
+        
+          <p class="article-more-link">
+            <a href="/2013/08/11/hello-world/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://dfkaye.github.io/2014/03/14/javascript-eval-and-function-constructor/" data-id="4r53iyd5quil9w7q" class="article-share-link">Share</a>
+      <a data-url="http://dfkaye.github.io/2013/08/11/hello-world/" data-id="rcg1fpqczq93ixzd" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Function/">Function</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/eval/">eval</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/metaprogramming/">metaprogramming</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/performance/">performance</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CSS/">CSS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TDD/">TDD</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hello/">hello</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/">hexo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pre-processors/">pre-processors</a></li></ul>
 
     </footer>
   </div>
@@ -485,7 +121,7 @@ the test.</li>
   
   
     <nav id="page-nav">
-      <a class="extend prev" href="/tags/JavaScript/">&laquo; Prev</a><a class="page-number" href="/tags/JavaScript/">1</a><span class="page-number current">2</span><a class="page-number" href="/tags/JavaScript/page/3/">3</a><a class="page-number" href="/tags/JavaScript/page/4/">4</a><a class="page-number" href="/tags/JavaScript/page/5/">5</a><a class="extend next" href="/tags/JavaScript/page/3/">Next &raquo;</a>
+      <a class="extend prev" href="/tags/JavaScript/">&laquo; Prev</a><a class="page-number" href="/tags/JavaScript/">1</a><span class="page-number current">2</span>
     </nav>
   
 </section>
@@ -498,7 +134,7 @@ the test.</li>
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSS/">CSS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoffeeScript/">CoffeeScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Function/">Function</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TDD/">TDD</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boilerplate/">boilerplate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/constructor/">constructor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/es-discuss/">es-discuss</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eval/">eval</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gulp/">gulp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hello/">hello</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/inheritance/">inheritance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/metaprogramming/">metaprogramming</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/multiline/">multiline</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/performance/">performance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/promise/">promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rawgithub/">rawgithub</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/simple/">simple</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/testem/">testem</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travis/">travis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uglify/">uglify</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zen of python/">zen of python</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSS/">CSS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoffeeScript/">CoffeeScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Function/">Function</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TDD/">TDD</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boilerplate/">boilerplate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/constructor/">constructor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/es-discuss/">es-discuss</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eval/">eval</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gulp/">gulp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hello/">hello</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/inheritance/">inheritance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/metaprogramming/">metaprogramming</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/multiline/">multiline</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/performance/">performance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pre-processors/">pre-processors</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/promise/">promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rawgithub/">rawgithub</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/simple/">simple</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/testem/">testem</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travis/">travis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uglify/">uglify</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zen of python/">zen of python</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -507,7 +143,7 @@ the test.</li>
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/CSS/" style="font-size: 10.00px;">CSS</a><a href="/tags/CoffeeScript/" style="font-size: 10.00px;">CoffeeScript</a><a href="/tags/Function/" style="font-size: 10.00px;">Function</a><a href="/tags/JavaScript/" style="font-size: 20.00px;">JavaScript</a><a href="/tags/TDD/" style="font-size: 15.00px;">TDD</a><a href="/tags/boilerplate/" style="font-size: 10.00px;">boilerplate</a><a href="/tags/constructor/" style="font-size: 10.00px;">constructor</a><a href="/tags/es-discuss/" style="font-size: 10.00px;">es-discuss</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/gulp/" style="font-size: 10.00px;">gulp</a><a href="/tags/hello/" style="font-size: 10.00px;">hello</a><a href="/tags/hexo/" style="font-size: 10.00px;">hexo</a><a href="/tags/inheritance/" style="font-size: 10.00px;">inheritance</a><a href="/tags/metaprogramming/" style="font-size: 10.00px;">metaprogramming</a><a href="/tags/multiline/" style="font-size: 10.00px;">multiline</a><a href="/tags/performance/" style="font-size: 10.00px;">performance</a><a href="/tags/promise/" style="font-size: 10.00px;">promise</a><a href="/tags/rawgithub/" style="font-size: 10.00px;">rawgithub</a><a href="/tags/simple/" style="font-size: 15.00px;">simple</a><a href="/tags/testem/" style="font-size: 10.00px;">testem</a><a href="/tags/travis/" style="font-size: 10.00px;">travis</a><a href="/tags/uglify/" style="font-size: 10.00px;">uglify</a><a href="/tags/zen of python/" style="font-size: 10.00px;">zen of python</a>
+      <a href="/tags/CSS/" style="font-size: 10.00px;">CSS</a><a href="/tags/CoffeeScript/" style="font-size: 10.00px;">CoffeeScript</a><a href="/tags/Function/" style="font-size: 10.00px;">Function</a><a href="/tags/JavaScript/" style="font-size: 20.00px;">JavaScript</a><a href="/tags/TDD/" style="font-size: 15.00px;">TDD</a><a href="/tags/boilerplate/" style="font-size: 10.00px;">boilerplate</a><a href="/tags/constructor/" style="font-size: 10.00px;">constructor</a><a href="/tags/es-discuss/" style="font-size: 10.00px;">es-discuss</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/gulp/" style="font-size: 10.00px;">gulp</a><a href="/tags/hello/" style="font-size: 10.00px;">hello</a><a href="/tags/hexo/" style="font-size: 10.00px;">hexo</a><a href="/tags/inheritance/" style="font-size: 10.00px;">inheritance</a><a href="/tags/metaprogramming/" style="font-size: 10.00px;">metaprogramming</a><a href="/tags/multiline/" style="font-size: 10.00px;">multiline</a><a href="/tags/performance/" style="font-size: 10.00px;">performance</a><a href="/tags/pre-processors/" style="font-size: 10.00px;">pre-processors</a><a href="/tags/promise/" style="font-size: 10.00px;">promise</a><a href="/tags/rawgithub/" style="font-size: 10.00px;">rawgithub</a><a href="/tags/simple/" style="font-size: 15.00px;">simple</a><a href="/tags/testem/" style="font-size: 10.00px;">testem</a><a href="/tags/travis/" style="font-size: 10.00px;">travis</a><a href="/tags/uglify/" style="font-size: 10.00px;">uglify</a><a href="/tags/zen of python/" style="font-size: 10.00px;">zen of python</a>
     </div>
   </div>
 
@@ -523,7 +159,7 @@ the test.</li>
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recents</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
@@ -532,7 +168,7 @@ the test.</li>
           </li>
         
           <li>
-            <a href="/2014/03/24/preserve-multiline-strings-with-uglify/">preserve /*** multiline strings ***/ with uglifyjs</a>
+            <a href="/2014/03/24/preserve-multiline-strings-with-uglify/">Preserving /*** multiline strings ***/ with UglifyJS2</a>
           </li>
         
           <li>

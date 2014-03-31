@@ -12,6 +12,7 @@
 <meta name="og:site_name" content="dfkaye.github.io">
 <meta name="og:description">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:creator" content="dfkaye">
   
     <link rel="alternative" href="/atom.xml" title="dfkaye.github.io" type="application/atom+xml">
   
@@ -77,7 +78,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2014/03/24/preserve-multiline-strings-with-uglify/">preserve /*** multiline strings ***/ with uglifyjs</a>
+      <a class="article-title" href="/2014/03/24/preserve-multiline-strings-with-uglify/">Preserving /*** multiline strings ***/ with UglifyJS2</a>
     </h1>
   
 
@@ -89,102 +90,16 @@
 <code>/*** multiline string comments ***/</code> when using 
 <a href="https://github.com/mishoo/UglifyJS2" target="_blank">uglifyjs</a> (i.e., uglify 2.0). The first 
 uses the basic uglify cli approach, the second uses <a href="http://gulpjs.com/" target="_blank">gulp</a>.</p>
-<p>Just started playing with this (22 MAR 2014) ~ haven&#39;t done a grunt or cha 
-example yet ~ some day, maybe&hellip;</p>
-<h2 id="node-cli-example">node cli example</h2>
-<p>see <a href="https://github.com/mishoo/UglifyJS2#keeping-comments-in-the-output" target="_blank">https://github.com/mishoo/UglifyJS2#keeping-comments-in-the-output</a></p>
-<p>When uglify identifies a multiline comment in the output, it excludes the <code>/*</code> 
-and <code>*/</code> delimiters from the comment body, so you need to test the first and 
-last 2 characters.</p>
-<p>Here&#39;s a <em>quick&amp;dirty</em> regex for that:</p>
-<pre><code>if (/^\*\*/.test(comment.value) &amp;&amp; /\*\*$/.test(comment.value)) {
-    return true;
-}
-</code></pre><p>Supposing we have a <code>source.js</code> file with a multiline string (<em>this one uses 
-<a href="//github.com/dfkaye/where.js">where.js</a>) syntax</em>):</p>
-<pre><code>where(function() {
-  /***
-    input | output
-    this  | this
 
-  ***/
-  expect(input).toBe(output);
-});
-</code></pre><p>Make a file like <code>uglify-source.js</code></p>
-<pre><code>var UglifyJS = require(&quot;uglify-js&quot;);
-var files = [&#39;source.js&#39;]; // &lt;= could do this cli-wise with process.argv
-var fs = require(&#39;fs&#39;);
-
-var all = [];
-
-files.forEach(function(file){
-
-  var result = UglifyJS.minify(file, {
-    output: {
-      comments: function (node, comment) {
-
-        console.log(comment.value);
-        if (/^\*\*/.test(comment.value) &amp;&amp; /\*\*$/.test(comment.value)) {
-
-          console.log(&#39;found tri-star comment&#39;)
-          return true;
-        }
-      }
-    }
-  });
-
-  all.push(result.code);
-});
-
-fs.writeFile(&#39;uglify-build.js&#39;, all.join(&#39;\n&#39;));
-</code></pre><p>Test it with </p>
-<pre><code>node uglify-source.js
-</code></pre><p>Should have a new file <code>uglify-build.js</code> with preserved comments</p>
-<pre><code>where(function(){/***
-    input | output
-    this  | this
-
-  ***/
-expect(input).toBe(output)});
-</code></pre><h2 id="gulp-example-with-gulp-uglify-and-gulp-rename">gulp example ~ with gulp-uglify and gulp-rename</h2>
-<p>see <a href="http://truongtx.me/2014/03/14/automate-javascript-development-with-gulp/" target="_blank">http://truongtx.me/2014/03/14/automate-javascript-development-with-gulp/</a></p>
-<p>Use the same <code>source.js</code></p>
-<p>Make <code>gulpfile.js</code></p>
-<pre><code>var gulp = require(&#39;gulp&#39;);
-var uglify = require(&#39;gulp-uglify&#39;);
-var rename = require(&#39;gulp-rename&#39;);
-
-gulp.task(&#39;uglify&#39;, function(){
-  gulp.src([&#39;./source.js&#39;]) // could do this cli-wise with process.argv
-  .pipe(uglify({
-
-    preserveComments: function (node, comment) {
-
-      console.log(comment.value);
-      if (/^\*\*/.test(comment.value) &amp;&amp; /\*\*$/.test(comment.value)) {
-
-        console.log(&#39;found tri-star comment&#39;);
-        return true;
-      }
-    }
-  }))
-  .pipe(rename(&#39;gulp-build.js&#39;))
-  .pipe(gulp.dest(&#39;./&#39;));
-});
-</code></pre><p>Test it with</p>
-<pre><code>gulp uglify
-</code></pre><p>Should have a new file <code>gulp-build.js</code> with preserved comments</p>
-<pre><code>where(function(){/***
-    input | output
-    this  | this
-
-  ***/
-expect(input).toBe(output)});
-</code></pre>
+        
+          <p class="article-more-link">
+            <a href="/2014/03/24/preserve-multiline-strings-with-uglify/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://dfkaye.github.io/2014/03/24/preserve-multiline-strings-with-uglify/" data-id="8jbrthizg893e5nm" class="article-share-link">Share</a>
+      <a data-url="http://dfkaye.github.io/2014/03/24/preserve-multiline-strings-with-uglify/" data-id="7yhpvdjcxtrnbzic" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/gulp/">gulp</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/multiline/">multiline</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/uglify/">uglify</a></li></ul>
@@ -207,7 +122,7 @@ expect(input).toBe(output)});
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSS/">CSS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoffeeScript/">CoffeeScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Function/">Function</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TDD/">TDD</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boilerplate/">boilerplate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/constructor/">constructor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/es-discuss/">es-discuss</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eval/">eval</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gulp/">gulp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hello/">hello</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/inheritance/">inheritance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/metaprogramming/">metaprogramming</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/multiline/">multiline</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/performance/">performance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/promise/">promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rawgithub/">rawgithub</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/simple/">simple</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/testem/">testem</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travis/">travis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uglify/">uglify</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zen of python/">zen of python</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSS/">CSS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoffeeScript/">CoffeeScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Function/">Function</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TDD/">TDD</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boilerplate/">boilerplate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/constructor/">constructor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/es-discuss/">es-discuss</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eval/">eval</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gulp/">gulp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hello/">hello</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/inheritance/">inheritance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/metaprogramming/">metaprogramming</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/multiline/">multiline</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/performance/">performance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pre-processors/">pre-processors</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/promise/">promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rawgithub/">rawgithub</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/simple/">simple</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/testem/">testem</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travis/">travis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uglify/">uglify</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zen of python/">zen of python</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -216,7 +131,7 @@ expect(input).toBe(output)});
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/CSS/" style="font-size: 10.00px;">CSS</a><a href="/tags/CoffeeScript/" style="font-size: 10.00px;">CoffeeScript</a><a href="/tags/Function/" style="font-size: 10.00px;">Function</a><a href="/tags/JavaScript/" style="font-size: 20.00px;">JavaScript</a><a href="/tags/TDD/" style="font-size: 15.00px;">TDD</a><a href="/tags/boilerplate/" style="font-size: 10.00px;">boilerplate</a><a href="/tags/constructor/" style="font-size: 10.00px;">constructor</a><a href="/tags/es-discuss/" style="font-size: 10.00px;">es-discuss</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/gulp/" style="font-size: 10.00px;">gulp</a><a href="/tags/hello/" style="font-size: 10.00px;">hello</a><a href="/tags/hexo/" style="font-size: 10.00px;">hexo</a><a href="/tags/inheritance/" style="font-size: 10.00px;">inheritance</a><a href="/tags/metaprogramming/" style="font-size: 10.00px;">metaprogramming</a><a href="/tags/multiline/" style="font-size: 10.00px;">multiline</a><a href="/tags/performance/" style="font-size: 10.00px;">performance</a><a href="/tags/promise/" style="font-size: 10.00px;">promise</a><a href="/tags/rawgithub/" style="font-size: 10.00px;">rawgithub</a><a href="/tags/simple/" style="font-size: 15.00px;">simple</a><a href="/tags/testem/" style="font-size: 10.00px;">testem</a><a href="/tags/travis/" style="font-size: 10.00px;">travis</a><a href="/tags/uglify/" style="font-size: 10.00px;">uglify</a><a href="/tags/zen of python/" style="font-size: 10.00px;">zen of python</a>
+      <a href="/tags/CSS/" style="font-size: 10.00px;">CSS</a><a href="/tags/CoffeeScript/" style="font-size: 10.00px;">CoffeeScript</a><a href="/tags/Function/" style="font-size: 10.00px;">Function</a><a href="/tags/JavaScript/" style="font-size: 20.00px;">JavaScript</a><a href="/tags/TDD/" style="font-size: 15.00px;">TDD</a><a href="/tags/boilerplate/" style="font-size: 10.00px;">boilerplate</a><a href="/tags/constructor/" style="font-size: 10.00px;">constructor</a><a href="/tags/es-discuss/" style="font-size: 10.00px;">es-discuss</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/gulp/" style="font-size: 10.00px;">gulp</a><a href="/tags/hello/" style="font-size: 10.00px;">hello</a><a href="/tags/hexo/" style="font-size: 10.00px;">hexo</a><a href="/tags/inheritance/" style="font-size: 10.00px;">inheritance</a><a href="/tags/metaprogramming/" style="font-size: 10.00px;">metaprogramming</a><a href="/tags/multiline/" style="font-size: 10.00px;">multiline</a><a href="/tags/performance/" style="font-size: 10.00px;">performance</a><a href="/tags/pre-processors/" style="font-size: 10.00px;">pre-processors</a><a href="/tags/promise/" style="font-size: 10.00px;">promise</a><a href="/tags/rawgithub/" style="font-size: 10.00px;">rawgithub</a><a href="/tags/simple/" style="font-size: 15.00px;">simple</a><a href="/tags/testem/" style="font-size: 10.00px;">testem</a><a href="/tags/travis/" style="font-size: 10.00px;">travis</a><a href="/tags/uglify/" style="font-size: 10.00px;">uglify</a><a href="/tags/zen of python/" style="font-size: 10.00px;">zen of python</a>
     </div>
   </div>
 
@@ -232,7 +147,7 @@ expect(input).toBe(output)});
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recents</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
@@ -241,7 +156,7 @@ expect(input).toBe(output)});
           </li>
         
           <li>
-            <a href="/2014/03/24/preserve-multiline-strings-with-uglify/">preserve /*** multiline strings ***/ with uglifyjs</a>
+            <a href="/2014/03/24/preserve-multiline-strings-with-uglify/">Preserving /*** multiline strings ***/ with UglifyJS2</a>
           </li>
         
           <li>
