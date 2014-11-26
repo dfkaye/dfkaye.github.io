@@ -93,7 +93,7 @@ once or twice, it&#39;s easy to get lost or just plain forget.</p>
 re-use when driving your JavaScript tests.  We&#39;ll set up the project to work 
 with <a href="https://github.com/" target="_blank">GitHub</a>, <a href="http://nodejs.org/" target="_blank">node.js</a>, 
 <a href="http://visionmedia.github.io/mocha/" target="_blank">mocha</a>, 
-<a href="http://rawgithub.com/" target="_blank">rawgithub</a>, 
+<a href="http://rawgit.com/" target="_blank">rawgit</a>, 
 <a href="https://github.com/airportyh/testem" target="_blank">testem</a> and 
 <a href="https://travis-ci.org/" target="_blank">travis</a>.  All steps were re-learned the hard way while 
 I worked through my own <a href="https://github.com/dfkaye/where.js" target="_blank">where.js</a> project 
@@ -106,6 +106,8 @@ to detail and their marvelous feedback</p>
 <li><a href="https://twitter.com/jamonholmgren" target="_blank">Jamon Holmgren</a></li>
 <li><a href="https://twitter.com/JohnBRoberts1" target="_blank">John B. Roberts</a> </li>
 </ul>
+<p><strong>Update: 25 NOV 2014</strong> ~ links to rawgithub have been modified to point to the 
+rawgit.com domain.</p>
 <a id="more"></a>
 
 <h2 id="cross-platform-emphasis">Cross-platform emphasis</h2>
@@ -144,10 +146,10 @@ the command each time.</p>
 <h3 id="-add-browser-suite-browser-suite-"><a href="#browser-suite">add browser suite</a></h3>
 <p>We&#39;ll create a browser suite for mocha that we can view as a standalone or 
 static page.</p>
-<h3 id="-add-rawgithub-link-rawgithub-"><a href="#rawgithub">add rawgithub link</a></h3>
-<p>We&#39;ll look at using <a href="http://rawgithub.com/" target="_blank">rawgithub</a>, a proxy service set up 
-by <a href="http://wonko.com/" target="_blank">Ryan Grove</a>, for loading static pages from your GitHub 
-repo, so you can view the <em>running</em> browser suite online.</p>
+<h3 id="-add-rawgit-link-rawgit-"><a href="#rawgit">add rawgit link</a></h3>
+<p>We&#39;ll look at using <a href="http://rawgit.com/" target="_blank">rawgit</a>, a proxy service 
+originally set up by <a href="http://wonko.com/" target="_blank">Ryan Grove</a>, for loading static pages 
+from your GitHub repo, so you can view the <em>running</em> browser suite online.</p>
 <h3 id="-add-testem-testem-"><a href="#testem">add testem</a></h3>
 <p>We&#39;ll use npm to install 
 <a href="https://github.com/airportyh/testem" target="_blank">testem</a>, a node.js socket-based test 
@@ -295,7 +297,8 @@ something like this</p>
     &quot;javascript&quot;,
     &quot;boilerplate&quot;,
     &quot;testem&quot;,
-    &quot;rawgithub&quot;
+    &quot;rawgithub&quot;,
+    &quot;rawgit&quot;
   ],
   &quot;author&quot;: &quot;YOUR_NAME &lt;YOUR@EMAILADDRESS.com&gt;&quot;,
   &quot;license&quot;: &quot;MIT&quot;,
@@ -585,24 +588,24 @@ git add .
 git commit -am &#39;browser suite; mocha files; assert; &#39;
 git push
 </code></pre><h3 id="-break-time-"><code>----------------------- BREAK TIME ------------------------</code></h3>
-<h2 id="rawgithub">rawgithub</h2>
+<h2 id="rawgit">rawgit</h2>
 <p>This <em>optional</em> step in the process is very short but worth considering for a 
 moment.</p>
-<p>I like using <a href="http://rawgithub.com" target="_blank">rawgithub</a> to confirm that the project&#39;s 
-browser tests really are accessing the correct file paths remotely, and to 
-share these tests with others online.</p>
-<h3 id="add-rawgithub-link-to-the-browser-suite-on-your-readme-page">Add rawgithub link to the browser suite on your README page</h3>
+<p>I like using <a href="http://rawgit.com" target="_blank">rawgit</a> (formerly rawgit<em>hub</em>) to confirm 
+that the project&#39;s browser tests really are accessing the correct file paths 
+remotely, and to share these tests with others online.</p>
+<h3 id="add-rawgit-link-to-the-browser-suite-on-your-readme-page">Add rawgit link to the browser suite on your README page</h3>
 <p>Open the README page and add the following markdown</p>
-<pre><code># rawgithub
+<pre><code># rawgit
 
-+ [mocha suite](https://rawgithub.com/YOUR_NAME/YOUR_PROJECT/master/test/mocha/browser-suite.html)
++ [mocha suite](https://rawgit.com/YOUR_NAME/YOUR_PROJECT/master/test/mocha/browser-suite.html)
 </code></pre><h3 id="commit-our-changes-to-git-and-push-them-to-github-">Commit our changes to git, and push them to GitHub.</h3>
 <pre><code>git status
 git add .
-git commit -am &#39;rawgithub&#39;
+git commit -am &#39;rawgit&#39;
 git push
-</code></pre><h3 id="view-the-browser-suites-on-rawgithub">View the browser suites on rawgithub</h3>
-<p>Give it a moment, then view the project page on GitHub and visit the rawgithub 
+</code></pre><h3 id="view-the-browser-suites-on-rawgit">View the browser suites on rawgit</h3>
+<p>Give it a moment, then view the project page on GitHub and visit the rawgit 
 page via the new link.</p>
 <h3 id="-break-time-"><code>----------------------- BREAK TIME ------------------------</code></h3>
 <h2 id="testem">testem</h2>
@@ -740,7 +743,7 @@ via the travis badge image.  There you can see the test run for the last commit.
 <h2 id="-voil-agrave-"><em>Voil&agrave;!</em></h2>
 <p>You now have a TDD boilerplate to get started testing JavaScript projects, 
 complete with travis, npm test commands, testem launchers, and re-usable browser 
-suite viewable as a standalone or on rawgithub <em>or</em> with testem.</p>
+suite viewable as standalone, or on rawgit, <em>or</em> with testem.</p>
 <p>You can start moving things around to your liking, clean up the relative paths 
 in the browser suite, for example, or move the <code>node_modules</code> directory out of 
 the project (I usually put it in a parallel directory to all my projects), or 
@@ -786,10 +789,10 @@ your setup.</p>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://dfkaye.github.io/2014/03/04/tdd-boilerplate/" data-id="3930f1bu9t274u5o" class="article-share-link">Share</a>
+      <a data-url="http://dfkaye.github.io/2014/03/04/tdd-boilerplate/" data-id="vd4gcd7h2v9g0k1d" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TDD/">TDD</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boilerplate/">boilerplate</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/rawgithub/">rawgithub</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/testem/">testem</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/travis/">travis</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TDD/">TDD</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boilerplate/">boilerplate</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/rawgit/">rawgit</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/rawgithub/">rawgithub</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/testem/">testem</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/travis/">travis</a></li></ul>
 
     </footer>
   </div>
@@ -835,7 +838,7 @@ your setup.</p>
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSS/">CSS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoffeeScript/">CoffeeScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Function/">Function</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TDD/">TDD</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boilerplate/">boilerplate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/constructor/">constructor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/es-discuss/">es-discuss</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eval/">eval</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gulp/">gulp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hello/">hello</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/inheritance/">inheritance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/metaprogramming/">metaprogramming</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/multiline/">multiline</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/performance/">performance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pre-processors/">pre-processors</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/promise/">promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rawgithub/">rawgithub</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/simple/">simple</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/testem/">testem</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travis/">travis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uglify/">uglify</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zen of python/">zen of python</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSS/">CSS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoffeeScript/">CoffeeScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Function/">Function</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TDD/">TDD</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boilerplate/">boilerplate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/constructor/">constructor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/es-discuss/">es-discuss</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eval/">eval</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gulp/">gulp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hello/">hello</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/inheritance/">inheritance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/metaprogramming/">metaprogramming</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/multiline/">multiline</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/performance/">performance</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pre-processors/">pre-processors</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/promise/">promise</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rawgit/">rawgit</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rawgithub/">rawgithub</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/simple/">simple</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/testem/">testem</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/travis/">travis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uglify/">uglify</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zen of python/">zen of python</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -844,7 +847,7 @@ your setup.</p>
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/CSS/" style="font-size: 10.00px;">CSS</a><a href="/tags/CoffeeScript/" style="font-size: 10.00px;">CoffeeScript</a><a href="/tags/Function/" style="font-size: 10.00px;">Function</a><a href="/tags/JavaScript/" style="font-size: 20.00px;">JavaScript</a><a href="/tags/TDD/" style="font-size: 15.00px;">TDD</a><a href="/tags/boilerplate/" style="font-size: 10.00px;">boilerplate</a><a href="/tags/constructor/" style="font-size: 10.00px;">constructor</a><a href="/tags/es-discuss/" style="font-size: 10.00px;">es-discuss</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/gulp/" style="font-size: 10.00px;">gulp</a><a href="/tags/hello/" style="font-size: 10.00px;">hello</a><a href="/tags/hexo/" style="font-size: 10.00px;">hexo</a><a href="/tags/inheritance/" style="font-size: 10.00px;">inheritance</a><a href="/tags/metaprogramming/" style="font-size: 10.00px;">metaprogramming</a><a href="/tags/multiline/" style="font-size: 10.00px;">multiline</a><a href="/tags/performance/" style="font-size: 10.00px;">performance</a><a href="/tags/pre-processors/" style="font-size: 10.00px;">pre-processors</a><a href="/tags/promise/" style="font-size: 10.00px;">promise</a><a href="/tags/rawgithub/" style="font-size: 10.00px;">rawgithub</a><a href="/tags/simple/" style="font-size: 15.00px;">simple</a><a href="/tags/testem/" style="font-size: 10.00px;">testem</a><a href="/tags/travis/" style="font-size: 10.00px;">travis</a><a href="/tags/uglify/" style="font-size: 10.00px;">uglify</a><a href="/tags/zen of python/" style="font-size: 10.00px;">zen of python</a>
+      <a href="/tags/CSS/" style="font-size: 10.00px;">CSS</a><a href="/tags/CoffeeScript/" style="font-size: 10.00px;">CoffeeScript</a><a href="/tags/Function/" style="font-size: 10.00px;">Function</a><a href="/tags/JavaScript/" style="font-size: 20.00px;">JavaScript</a><a href="/tags/TDD/" style="font-size: 15.00px;">TDD</a><a href="/tags/boilerplate/" style="font-size: 10.00px;">boilerplate</a><a href="/tags/constructor/" style="font-size: 10.00px;">constructor</a><a href="/tags/es-discuss/" style="font-size: 10.00px;">es-discuss</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/gulp/" style="font-size: 10.00px;">gulp</a><a href="/tags/hello/" style="font-size: 10.00px;">hello</a><a href="/tags/hexo/" style="font-size: 10.00px;">hexo</a><a href="/tags/inheritance/" style="font-size: 10.00px;">inheritance</a><a href="/tags/metaprogramming/" style="font-size: 10.00px;">metaprogramming</a><a href="/tags/multiline/" style="font-size: 10.00px;">multiline</a><a href="/tags/performance/" style="font-size: 10.00px;">performance</a><a href="/tags/pre-processors/" style="font-size: 10.00px;">pre-processors</a><a href="/tags/promise/" style="font-size: 10.00px;">promise</a><a href="/tags/rawgit/" style="font-size: 10.00px;">rawgit</a><a href="/tags/rawgithub/" style="font-size: 10.00px;">rawgithub</a><a href="/tags/simple/" style="font-size: 15.00px;">simple</a><a href="/tags/testem/" style="font-size: 10.00px;">testem</a><a href="/tags/travis/" style="font-size: 10.00px;">travis</a><a href="/tags/uglify/" style="font-size: 10.00px;">uglify</a><a href="/tags/zen of python/" style="font-size: 10.00px;">zen of python</a>
     </div>
   </div>
 
